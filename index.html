@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Finanze">
+  <meta name="theme-color" content="#0D0D0D">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>Finanza Personale</title>
+
+  <style>
+    /* ─── CONFIGURAZIONE COLORI — modifica solo qui ─────────────────────
+       --accent-uscita : colore per le uscite
+       --accent-entrata: colore per le entrate
+       --bg-primary    : sfondo principale dell'app
+    ────────────────────────────────────────────────────────────────────── */
+    :root {
+      --accent-uscita:  #E05A3A;
+      --accent-entrata: #27AE60;
+      --bg-primary:     #0D0D0D;
+      --bg-card:        #1A1A1A;
+      --bg-field:       #242424;
+      --bg-sheet:       #1A1A1A;
+      --text-primary:   #FFFFFF;
+      --text-secondary: #888888;
+      --text-muted:     #444444;
+      --border:         #2E2E2E;
+      --radius-sm:      10px;
+      --radius-md:      14px;
+      --radius-lg:      20px;
+      --accent:         var(--accent-uscita);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+
+    /* ─── LAYOUT ──────────────────────────────────────────────────────── */
+    .app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      max-width: 430px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* ─── STATUS BAR SPACER ───────────────────────────────────────────── */
+    .safe-top { height: env(safe-area-inset-top, 44px); }
+    .safe-bottom { height: env(safe-area-inset-bottom, 0px); }
+
+    /* ─── HEADER ──────────────────────────────────────────────────────── */
+    .header {
+      padding: 12px 20px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header-date { color: var(--text-secondary); font-size: 13px; font-weight: 400; }
+    .header-title { color: var(--text-primary); font-size: 15px; font-weight: 600; text-align: center; }
+    .header-btn {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--bg-field);
+      border: none;
+      color: var(--text-secondary);
+      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+
+    /* ─── TIPO TOGGLE ─────────────────────────────────────────────────── */
+    .tipo-wrap { padding: 0 20px 4px; }
+    .tipo-toggle {
+      display: flex;
+      background: var(--bg-field);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      gap: 4px;
+    }
+    .tipo-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+      letter-spacing: -0.2px;
+    }
+    .tipo-btn.active-uscita  { background: var(--accent-uscita);  color: #fff; }
+    .tipo-btn.active-entrata { background: var(--accent-entrata); color: #fff; }
+    .tipo-btn.inactive { background: transparent; color: var(--text-muted); }
+
+    /* ─── IMPORTO ─────────────────────────────────────────────────────── */
+    .amount-wrap {
+      padding: 8px 20px 16px;
+      text-align: center;
+    }
+    .amount-label { color: var(--text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px; }
+    .amount-display {
+      font-size: 52px;
+      font-weight: 200;
+      letter-spacing: -2px;
+      color: var(--text-primary);
+      line-height: 1;
+      transition: color .2s;
+    }
+    .amount-display .currency { font-size: 28px; font-weight: 300; color: var(--text-secondary); margin-right: 2px; vertical-align: super; }
+    .amount-display.has-value { color: var(--accent); }
+
+    /* ─── FORM FIELDS ─────────────────────────────────────────────────── */
+    .fields { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; overflow: hidden; }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      background: var(--bg-field);
+      border-radius: var(--radius-sm);
+      padding: 0 14px;
+      height: 50px;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: border-color .15s;
+      gap: 12px;
+    }
+    .field-row:active { opacity: .8; }
+    .field-row.filled { border-color: var(--border); }
+
+    .field-icon { font-size: 16px; flex-shrink: 0; width: 20px; text-align: center; }
+    .field-content { flex: 1; min-width: 0; }
+    .field-label-sm { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 1px; }
+    .field-value-text { font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .field-value-text.placeholder { color: var(--text-muted); }
+    .field-arrow { color: var(--text-muted); font-size: 18px; flex-shrink: 0; }
+
+    /* Note field */
+    .note-field {
+      background: var(--bg-field);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .note-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      caret-color: var(--accent);
+    }
+    .note-input::placeholder { color: var(--text-muted); }
+
+    /* ─── NUMPAD ──────────────────────────────────────────────────────── */
+    .numpad {
+      padding: 12px 16px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+    .numpad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .key {
+      background: var(--bg-card);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 20px;
+      font-weight: 400;
+      height: 54px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .08s, background .08s;
+      font-family: inherit;
+      letter-spacing: -0.5px;
+    }
+    .key:active { transform: scale(.93); background: #333; }
+    .key.del { background: var(--bg-field); font-size: 18px; }
+    .key.del:active { background: #333; }
+    .key.save {
+      grid-column: span 3;
+      background: var(--accent);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      height: 54px;
+      border-radius: var(--radius-md);
+      letter-spacing: -0.3px;
+    }
+    .key.save:active { transform: scale(.98); opacity: .9; }
+    .key.save:disabled { opacity: .35; cursor: default; transform: none; }
+
+    /* ─── BOTTOM SHEET ────────────────────────────────────────────────── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.6);
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+    .overlay.show { opacity: 1; pointer-events: all; }
+
+    .sheet {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--bg-sheet);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      z-index: 100;
+      transform: translateY(100%);
+      transition: transform .3s cubic-bezier(.32,.72,0,1);
+      max-height: 72vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    .sheet.open { transform: translateY(0); }
+
+    .sheet-handle {
+      width: 40px; height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 12px auto 4px;
+      flex-shrink: 0;
+    }
+    .sheet-header {
+      padding: 8px 20px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .sheet-title-text { font-size: 16px; font-weight: 600; }
+    .sheet-close {
+      background: var(--bg-field);
+      border: none;
+      color: var(--text-secondary);
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .sheet-list { overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+
+    .sheet-item {
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      height: 54px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      gap: 14px;
+      transition: background .1s;
+    }
+    .sheet-item:active { background: var(--bg-field); }
+    .sheet-item:last-child { border-bottom: none; }
+    .sheet-item-icon { font-size: 18px; width: 26px; text-align: center; flex-shrink: 0; }
+    .sheet-item-text { flex: 1; font-size: 15px; color: var(--text-primary); }
+    .sheet-item-check {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      color: #fff;
+      opacity: 0;
+      flex-shrink: 0;
+    }
+    .sheet-item.selected .sheet-item-check { opacity: 1; }
+    .sheet-item.selected .sheet-item-text { color: var(--accent); font-weight: 500; }
+
+    /* ─── TOAST / CONFIRM ─────────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+      left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 24px;
+      font-size: 14px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      z-index: 200;
+      opacity: 0;
+      transition: opacity .2s, transform .2s;
+      text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.success { border-color: var(--accent-entrata); color: var(--accent-entrata); }
+    .toast.error   { border-color: var(--accent-uscita); color: var(--accent-uscita); }
+
+    /* ─── LOADING SPINNER ─────────────────────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── CONFIG SCREEN ───────────────────────────────────────────────── */
+    .config-screen {
+      position: fixed; inset: 0;
+      background: var(--bg-primary);
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      padding: 0 20px;
+      overflow-y: auto;
+    }
+    .config-screen.show { display: flex; }
+    .config-title { font-size: 22px; font-weight: 700; margin: 20px 0 6px; }
+    .config-sub { color: var(--text-secondary); font-size: 13px; margin-bottom: 24px; line-height: 1.5; }
+    .config-label { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--text-secondary); margin-bottom: 8px; margin-top: 18px; }
+    .config-input {
+      width: 100%;
+      background: var(--bg-field);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 13px 14px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: 'SF Mono', monospace;
+      outline: none;
+    }
+    .config-input:focus { border-color: var(--accent); }
+    .config-save {
+      margin: 24px 0;
+      width: 100%;
+      padding: 16px;
+      background: var(--accent-entrata);
+      border: none;
+      border-radius: var(--radius-md);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .config-note {
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .config-note strong { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+
+<!-- ─── CONFIG SCREEN ──────────────────────────────────────────────────── -->
+<div class="config-screen" id="configScreen">
+  <div class="safe-top"></div>
+  <div class="config-title">Configurazione</div>
+  <div class="config-sub">Inserisci l'URL del tuo Google Apps Script. Serve solo la prima volta.</div>
+
+  <div class="config-label">Google Apps Script URL</div>
+  <input class="config-input" id="cfgUrl" type="url"
+    placeholder="https://script.google.com/macros/s/..." autocomplete="off" spellcheck="false">
+
+  <div class="config-note">
+    <strong>Come ottenerlo:</strong><br>
+    1. Apri il tuo Google Sheet → Estensioni → Apps Script<br>
+    2. Incolla il codice da <code>GoogleAppsScript.gs</code><br>
+    3. Distribuisci → Nuova distribuzione → App web<br>
+    4. Copia l'URL e incollalo qui sopra
+  </div>
+
+  <button class="config-save" onclick="saveConfig()">Salva e inizia</button>
+  <div class="safe-bottom"></div>
+</div>
+
+<!-- ─── MAIN APP ───────────────────────────────────────────────────────── -->
+<div class="app" id="mainApp" style="display:none">
+  <div class="safe-top"></div>
+
+  <div class="header">
+    <div class="header-date" id="headerDate"></div>
+    <div class="header-title">Nuova transazione</div>
+    <button class="header-btn" onclick="openConfig()" title="Impostazioni">&#9881;</button>
+  </div>
+
+  <div class="tipo-wrap">
+    <div class="tipo-toggle">
+      <button class="tipo-btn active-uscita" id="btnUscita" onclick="setTipo('Uscita')">Uscita</button>
+      <button class="tipo-btn inactive"      id="btnEntrata" onclick="setTipo('Entrata')">Entrata</button>
+    </div>
+  </div>
+
+  <div class="amount-wrap">
+    <div class="amount-label">importo</div>
+    <div class="amount-display" id="amountDisplay">
+      <span class="currency">€</span><span id="amountVal">0</span>
+    </div>
+  </div>
+
+  <div class="fields">
+    <div class="field-row" id="fieldCat" onclick="openSheet('cat')">
+      <div class="field-icon">&#9783;</div>
+      <div class="field-content">
+        <div class="field-label-sm">Macro categoria</div>
+        <div class="field-value-text placeholder" id="catLabel">Seleziona categoria</div>
+      </div>
+      <div class="field-arrow">&#8250;</div>
+    </div>
+
+    <div class="field-row" id="fieldConto" onclick="openSheet('conto')">
+      <div class="field-icon">&#128179;</div>
+      <div class="field-content">
+        <div class="field-label-sm">Conto / Carta</div>
+        <div class="field-value-text placeholder" id="contoLabel">Seleziona conto</div>
+      </div>
+      <div class="field-arrow">&#8250;</div>
+    </div>
+
+    <div class="field-row" id="fieldDest" onclick="openSheet('dest')">
+      <div class="field-icon">&#127991;</div>
+      <div class="field-content">
+        <div class="field-label-sm">Destinazione</div>
+        <div class="field-value-text placeholder" id="destLabel">Seleziona destinazione</div>
+      </div>
+      <div class="field-arrow">&#8250;</div>
+    </div>
+
+    <div class="note-field">
+      <div class="field-icon" style="color:var(--text-secondary)">&#9998;</div>
+      <input class="note-input" id="noteInput" type="text" placeholder="Nota (opzionale)" maxlength="120">
+    </div>
+  </div>
+
+  <div class="numpad">
+    <div class="numpad-grid">
+      <button class="key" onclick="key('1')">1</button>
+      <button class="key" onclick="key('2')">2</button>
+      <button class="key" onclick="key('3')">3</button>
+      <button class="key" onclick="key('4')">4</button>
+      <button class="key" onclick="key('5')">5</button>
+      <button class="key" onclick="key('6')">6</button>
+      <button class="key" onclick="key('7')">7</button>
+      <button class="key" onclick="key('8')">8</button>
+      <button class="key" onclick="key('9')">9</button>
+      <button class="key" onclick="key('.')">.</button>
+      <button class="key" onclick="key('0')">0</button>
+      <button class="key del" onclick="del()">&#9003;</button>
+      <button class="key save" id="saveBtn" onclick="salva()">Salva transazione</button>
+    </div>
+  </div>
+
+  <div class="safe-bottom"></div>
+</div>
+
+<!-- ─── OVERLAY ────────────────────────────────────────────────────────── -->
+<div class="overlay" id="overlay" onclick="closeSheet()"></div>
+
+<!-- ─── BOTTOM SHEETS ──────────────────────────────────────────────────── -->
+<div class="sheet" id="sheetCat">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title-text">Macro categoria</div>
+    <button class="sheet-close" onclick="closeSheet()">&#10005;</button>
+  </div>
+  <div class="sheet-list" id="listCat"></div>
+</div>
+
+<div class="sheet" id="sheetConto">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title-text">Conto / Carta</div>
+    <button class="sheet-close" onclick="closeSheet()">&#10005;</button>
+  </div>
+  <div class="sheet-list" id="listConto"></div>
+</div>
+
+<div class="sheet" id="sheetDest">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title-text">Destinazione</div>
+    <button class="sheet-close" onclick="closeSheet()">&#10005;</button>
+  </div>
+  <div class="sheet-list" id="listDest"></div>
+</div>
+
+<!-- ─── TOAST ──────────────────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG ─────────────────────────────────────────────────────────────────
+// Modifica questi dati per personalizzare l'app
+const CONFIG = {
+  categorie_uscita: [
+    { label: 'Casa',         icon: '🏠' },
+    { label: 'Cibo',         icon: '🍽️' },
+    { label: 'Trasporti',    icon: '🚗' },
+    { label: 'Abbonamenti',  icon: '📱' },
+    { label: 'Svago',        icon: '🎬' },
+    { label: 'Salute',       icon: '❤️' },
+    { label: 'Investimenti', icon: '📈' },
+    { label: 'Tasse',        icon: '🏛️' },
+    { label: 'Lavoro',       icon: '💼' },
+    { label: 'Altro',        icon: '•' },
+  ],
+  categorie_entrata: [
+    { label: 'Stipendio',        icon: '💰' },
+    { label: 'Bonus',            icon: '🎯' },
+    { label: 'Rimborso Lavoro',  icon: '🧾' },
+    { label: 'Affitto Percepito',icon: '🏘️' },
+    { label: 'Dividendi',        icon: '📊' },
+    { label: 'Interessi',        icon: '🏦' },
+    { label: 'Vendite',          icon: '🤝' },
+    { label: 'Regalo',           icon: '🎁' },
+    { label: 'Altro',            icon: '•' },
+  ],
+  conti: [
+    { label: 'Conto Corrente',  icon: '🏦' },
+    { label: 'Carta Debito AMEX', icon: '💳' },
+    { label: 'Carta Revolut',   icon: '💳' },
+    { label: 'Broker DEGIRO',   icon: '📈' },
+    { label: 'Contanti',        icon: '💵' },
+  ],
+  destinazioni: [
+    { label: 'Personale',  icon: '👤' },
+    { label: 'Lavoro',     icon: '💼' },
+    { label: 'Famiglia',   icon: '👨‍👩‍👧' },
+    { label: 'Condiviso',  icon: '🤝' },
+  ]
+};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let state = {
+  tipo: 'Uscita',
+  amount: '0',
+  categoria: '',
+  conto: '',
+  destinazione: '',
+  nota: '',
+};
+
+let activeSheet = null;
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+function init() {
+  // Service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+
+  // Data header
+  const now = new Date();
+  document.getElementById('headerDate').textContent =
+    now.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  // Check config
+  const url = localStorage.getItem('appsScriptUrl');
+  if (!url) {
+    document.getElementById('configScreen').classList.add('show');
+  } else {
+    document.getElementById('mainApp').style.display = 'flex';
+  }
+
+  // Build sheet lists
+  buildList('listCat', CONFIG.categorie_uscita, 'categoria');
+  buildList('listConto', CONFIG.conti, 'conto');
+  buildList('listDest', CONFIG.destinazioni, 'destinazione');
+}
+
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+function saveConfig() {
+  const url = document.getElementById('cfgUrl').value.trim();
+  if (!url.startsWith('https://script.google.com')) {
+    showToast('URL non valido', 'error'); return;
+  }
+  localStorage.setItem('appsScriptUrl', url);
+  document.getElementById('configScreen').classList.remove('show');
+  document.getElementById('mainApp').style.display = 'flex';
+}
+
+function openConfig() {
+  document.getElementById('cfgUrl').value = localStorage.getItem('appsScriptUrl') || '';
+  document.getElementById('configScreen').classList.add('show');
+}
+
+// ─── TIPO ────────────────────────────────────────────────────────────────────
+function setTipo(t) {
+  state.tipo = t;
+  state.categoria = '';
+
+  document.getElementById('btnUscita').className  = t === 'Uscita'  ? 'tipo-btn active-uscita'  : 'tipo-btn inactive';
+  document.getElementById('btnEntrata').className = t === 'Entrata' ? 'tipo-btn active-entrata' : 'tipo-btn inactive';
+
+  document.documentElement.style.setProperty('--accent',
+    t === 'Uscita' ? 'var(--accent-uscita)' : 'var(--accent-entrata)');
+
+  document.getElementById('catLabel').textContent = 'Seleziona categoria';
+  document.getElementById('catLabel').classList.add('placeholder');
+  document.getElementById('fieldCat').classList.remove('filled');
+
+  const cats = t === 'Uscita' ? CONFIG.categorie_uscita : CONFIG.categorie_entrata;
+  buildList('listCat', cats, 'categoria');
+
+  updateAmountColor();
+}
+
+// ─── AMOUNT ──────────────────────────────────────────────────────────────────
+function key(k) {
+  if (k === '.' && state.amount.includes('.')) return;
+  if (state.amount.replace('.','').length >= 8) return;
+  state.amount = state.amount === '0' && k !== '.' ? k : state.amount + k;
+  renderAmount();
+  vibrate(5);
+}
+
+function del() {
+  state.amount = state.amount.length > 1 ? state.amount.slice(0, -1) : '0';
+  renderAmount();
+}
+
+function renderAmount() {
+  document.getElementById('amountVal').textContent = state.amount;
+  updateAmountColor();
+}
+
+function updateAmountColor() {
+  const display = document.getElementById('amountDisplay');
+  display.classList.toggle('has-value', parseFloat(state.amount) > 0);
+}
+
+// ─── BOTTOM SHEET ─────────────────────────────────────────────────────────────
+function buildList(containerId, items, stateKey) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = items.map(item => `
+    <div class="sheet-item ${state[stateKey] === item.label ? 'selected' : ''}"
+         onclick="pickItem('${stateKey}','${item.label}')">
+      <div class="sheet-item-icon">${item.icon}</div>
+      <div class="sheet-item-text">${item.label}</div>
+      <div class="sheet-item-check">&#10003;</div>
+    </div>
+  `).join('');
+}
+
+function openSheet(which) {
+  activeSheet = which;
+  const sheetMap = { cat: 'sheetCat', conto: 'sheetConto', dest: 'sheetDest' };
+  document.getElementById(sheetMap[which]).classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+  vibrate(8);
+}
+
+function closeSheet() {
+  ['sheetCat','sheetConto','sheetDest'].forEach(id =>
+    document.getElementById(id).classList.remove('open'));
+  document.getElementById('overlay').classList.remove('show');
+  activeSheet = null;
+}
+
+function pickItem(stateKey, value) {
+  state[stateKey] = value;
+
+  const labelMap = {
+    categoria:    { labelId: 'catLabel',   fieldId: 'fieldCat' },
+    conto:        { labelId: 'contoLabel', fieldId: 'fieldConto' },
+    destinazione: { labelId: 'destLabel',  fieldId: 'fieldDest' },
+  };
+  const m = labelMap[stateKey];
+  const label = document.getElementById(m.labelId);
+  label.textContent = value;
+  label.classList.remove('placeholder');
+  document.getElementById(m.fieldId).classList.add('filled');
+
+  // Rebuild list to show selection
+  const listMap = {
+    categoria:    { listId: 'listCat',   items: state.tipo === 'Uscita' ? CONFIG.categorie_uscita : CONFIG.categorie_entrata },
+    conto:        { listId: 'listConto', items: CONFIG.conti },
+    destinazione: { listId: 'listDest',  items: CONFIG.destinazioni },
+  };
+  const lm = listMap[stateKey];
+  buildList(lm.listId, lm.items, stateKey);
+
+  vibrate(10);
+  setTimeout(closeSheet, 180);
+}
+
+// ─── SALVA ───────────────────────────────────────────────────────────────────
+async function salva() {
+  const amount = parseFloat(state.amount);
+  if (!amount || amount === 0) { showToast('Inserisci un importo', 'error'); return; }
+  if (!state.categoria)    { showToast('Seleziona una categoria', 'error'); return; }
+  if (!state.conto)        { showToast('Seleziona il conto', 'error'); return; }
+  if (!state.destinazione) { showToast('Seleziona la destinazione', 'error'); return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Salvataggio...';
+
+  const payload = {
+    data:          new Date().toISOString(),
+    importo:       amount,
+    tipo:          state.tipo,
+    macroCategoria: state.categoria,
+    conto:         state.conto,
+    destinazione:  state.destinazione,
+    note:          document.getElementById('noteInput').value.trim(),
+  };
+
+  try {
+    const url = localStorage.getItem('appsScriptUrl');
+    const res = await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    vibrate([20, 50, 20]);
+    showToast('✓  Transazione salvata', 'success');
+    resetForm();
+  } catch (err) {
+    showToast('Errore di connessione', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Salva transazione';
+  }
+}
+
+function resetForm() {
+  state.amount = '0';
+  state.categoria = '';
+  state.conto = '';
+  state.destinazione = '';
+  document.getElementById('amountVal').textContent = '0';
+  document.getElementById('amountDisplay').classList.remove('has-value');
+  document.getElementById('noteInput').value = '';
+  ['catLabel','contoLabel','destLabel'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.add('placeholder');
+  });
+  document.getElementById('catLabel').textContent = 'Seleziona categoria';
+  document.getElementById('contoLabel').textContent = 'Seleziona conto';
+  document.getElementById('destLabel').textContent = 'Seleziona destinazione';
+  ['fieldCat','fieldConto','fieldDest'].forEach(id =>
+    document.getElementById(id).classList.remove('filled'));
+
+  const cats = state.tipo === 'Uscita' ? CONFIG.categorie_uscita : CONFIG.categorie_entrata;
+  buildList('listCat', cats, 'categoria');
+  buildList('listConto', CONFIG.conti, 'conto');
+  buildList('listDest', CONFIG.destinazioni, 'destinazione');
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function vibrate(pattern) {
+  if (navigator.vibrate) navigator.vibrate(pattern);
+}
+
+init();
+</script>
+</body>
+</html>
