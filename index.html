@@ -561,10 +561,10 @@ const CONFIG = {
     { label: 'Ticket Restaurant',    icon: '&#128181;' },
   ],
   destinazioni: [
-    { label: 'Condiviso', icon: '&#129309;' },
-    { label: 'Famiglia',  icon: '&#128106;' },
-    { label: 'Lavoro',    icon: '&#128188;' },
     { label: 'Personale', icon: '&#128100;' },
+    { label: 'Lavoro',    icon: '&#128188;' },
+    { label: 'Condiviso', icon: '&#129309;' },
+    { label: 'Famiglia',  icon: '&#128106;' }, 
   ]
 };
 
@@ -586,7 +586,7 @@ const AudioEngine = {
     document.addEventListener('click', unlock, { once: true });
   },
 
-  play(freq, type, duration, vol = 0.08) {
+  play(freq, type, duration, vol = 0.12) {
     if (!this.ctx) this.init();
     if (this.ctx.state === 'suspended') return;
 
