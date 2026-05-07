@@ -686,9 +686,14 @@ function init() {
     document.getElementById('mainApp').style.display = 'flex';
   }
 
+  // --- AGGIORNAMENTO QUI ---
   buildCatList();
   buildList('listConto', CONFIG.conti, 'conto');
   buildList('listDest', CONFIG.destinazioni, 'destinazione');
+  
+  // Aggiungiamo questa riga per popolare i conti di destinazione nei trasferimenti
+  buildList('listContoDest', CONFIG.conti, 'contoDestinazione'); 
+  // -------------------------
 }
 
 // ================================================================
