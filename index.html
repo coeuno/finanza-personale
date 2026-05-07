@@ -914,56 +914,69 @@ async function salva() {
     return; 
   }
   
-  // Validazioni condizionali
-  if (state.tipo !== 'Trasferimento') {
-    if (!state.categoria) { showToast('Seleziona una categoria', 'error'); AudioEngine.error(); Haptic.error(); return; }
-    if (!state.sottocategoria) { showToast('Seleziona una sottocategoria', 'error'); AudioEngine.error(); Haptic.error(); return; }
-    if (!state.destinazione) { showToast('Seleziona la destinazione', 'error'); AudioEngine.error(); Haptic.error(); return; }
-  } else {
-    // Validazione specifica per Trasferimento
-    if (!state.contoDestinazione) { showToast('Seleziona il conto di arrivo', 'error'); AudioEngine.error(); Haptic.error(); return; }
-    if (state.conto === state.contoDestinazione) { showToast('I conti devono essere diversi', 'error'); AudioEngine.error(); Haptic.error(); return; }
+  // ================================================================
+//  SALVA (Versione Compatibile)
+// ================================================================
+async function salva() {
+  const amount = getAmountFloat();
+  if (!amount || amount === 0) { 
+    showToast('Inserisci un importo', 'error'); 
+    AudioEngine.error(); Haptic.error();
+    return; 
   }
 
-  if (!state.conto) { showToast('Seleziona il conto', 'error'); AudioEngine.error(); Haptic.error(); return; }
+  // Validazioni
+  if (state.tipo === 'Trasferimento') {
+    if (!state.conto || !state.contoDestinazione) {
+      showToast('Seleziona entrambi i conti', 'error');
+      AudioEngine.error(); return;
+    }
+  } else {
+    if (!state.categoria || !state.conto) {
+      showToast('Mancano dati obbligatori', 'error');
+      AudioEngine.error(); return;
+    }
+  }
 
   const btn = document.getElementById('saveBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Salvataggio...';
+  btn.innerHTML = '<span class="spinner"></span>...';
 
-  // Importo: negativo per Uscite, positivo per Entrate e Trasferimenti
   const importoConSegno = state.tipo === 'Uscita' ? -amount : amount;
 
+  // Questo pacchetto deve corrispondere alle colonne del tuo Script
   const payload = {
     timestamp:          new Date().toISOString(),
     dataSpesa:          state.dataSpesa,
     importo:            importoConSegno,
     tipo:               state.tipo,
-    // Se è un trasferimento, scriviamo "Trasferimento" come categoria per il database
-    categoria:          state.tipo === 'Trasferimento' ? 'Trasferimento' : state.categoria,
-    sottocategoria:     state.tipo === 'Trasferimento' ? '-' : state.sottocategoria,
-    conto:              state.conto,
+    categoria:          state.tipo === 'Trasferimento' ? 'Trasferimento' : (state.categoria || ''),
+    sottocategoria:     state.tipo === 'Trasferimento' ? '-' : (state.sottocategoria || ''),
+    conto:              state.conto || '',
     contoDestinazione:  state.tipo === 'Trasferimento' ? state.contoDestinazione : '',
-    destinazione:       state.tipo === 'Trasferimento' ? '-' : state.destinazione,
+    destinazione:       state.tipo === 'Trasferimento' ? '-' : (state.destinazione || ''),
     note:               document.getElementById('noteInput').value.trim(),
     fonte:              'iPhone'
   };
 
   try {
     const url = localStorage.getItem('appsScriptUrl');
+    
+    // Metodo semplificato per massimizzare la compatibilità con Apps Script
     await fetch(url, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      cache: 'no-cache',
+      body: JSON.stringify(payload)
     });
 
+    // Se arriviamo qui, il browser ha inviato il pacchetto
     AudioEngine.success(); Haptic.success();
-    showToast('&#10003; Transazione salvata', 'success');
+    showToast('&#10003; Inviato al foglio', 'success');
     resetForm();
   } catch (err) {
-    AudioEngine.error(); Haptic.error();
-    showToast('Errore di connessione', 'error');
+    console.error(err);
+    showToast('Errore di rete', 'error');
   } finally {
     btn.disabled = false;
     btn.textContent = 'Salva transazione';
