@@ -362,43 +362,29 @@
 </head>
 <body>
 
-<!-- CONFIG SCREEN -->
 <div class="config-screen" id="configScreen">
   <div class="safe-top"></div>
   <div class="config-title">Configurazione</div>
-  <div class="config-sub">Inserisci l'URL del tuo Google Apps Script. Serve solo la prima volta.</div>
-
+  <div class="config-sub">Inserisci l'URL del tuo Google Apps Script.</div>
   <div class="config-label">Google Apps Script URL</div>
-  <input class="config-input" id="cfgUrl" type="url"
-    placeholder="https://script.google.com/macros/s/..." autocomplete="off" spellcheck="false">
-
-  <div class="config-note">
-    <strong>Come ottenerlo:</strong><br>
-    1. Apri il tuo Google Sheet → Estensioni → Apps Script<br>
-    2. Incolla il codice da <code>GoogleAppsScript.gs</code><br>
-    3. Distribuisci → Nuova distribuzione → App web<br>
-    4. Copia l'URL e incollalo qui sopra
-  </div>
-
+  <input class="config-input" id="cfgUrl" type="url" placeholder="https://script.google.com/macros/s/..." autocomplete="off">
   <button class="config-save" onclick="saveConfig()">Salva e inizia</button>
   <div class="safe-bottom"></div>
 </div>
 
-<!-- MAIN APP -->
 <div class="app" id="mainApp" style="display:none">
   <div class="safe-top"></div>
-
   <div class="header">
     <div class="header-date" id="headerDate"></div>
     <div class="header-title">Nuova transazione</div>
-    <button class="header-btn" onclick="openConfig()" title="Impostazioni">&#9881;</button>
+    <button class="header-btn" onclick="openConfig()">⚙</button>
   </div>
 
-  <div class="tipo-wrap">
+  <div class="tipo-wrap" style="padding: 0 20px 10px;">
     <div class="tipo-toggle">
-      <button class="tipo-btn active-uscita" id="btnUscita"  onclick="setTipo('Uscita')">Uscita</button>
-      <button class="tipo-btn inactive"      id="btnEntrata" onclick="setTipo('Entrata')">Entrata</button>
-      <button class="tipo-btn inactive"      id="btnTrasf"   onclick="setTipo('Trasferimento')">Trasf.</button>
+      <button class="tipo-btn active-uscita" id="btnUscita" onclick="setTipo('Uscita')">Uscita</button>
+      <button class="tipo-btn inactive" id="btnEntrata" onclick="setTipo('Entrata')">Entrata</button>
+      <button class="tipo-btn inactive" id="btnTrasf" onclick="setTipo('Trasferimento')">Trasf.</button>
     </div>
   </div>
 
@@ -422,60 +408,54 @@
   </div>
 
   <div class="fields">
-    <!-- CATEGORIA -->
     <div class="field-row" id="fieldCat" onclick="openSheet('cat')">
       <div class="field-icon" style="color:#F59E0B;">📗</div>
       <div class="field-content">
         <div class="field-label-sm">Categoria</div>
         <div class="field-value-text placeholder" id="catLabel">Seleziona categoria</div>
       </div>
-      <div class="field-arrow">&#8250;</div>
+      <div class="field-arrow">›</div>
     </div>
 
-    <!-- SOTTOCATEGORIA -->
     <div class="field-row" id="fieldSub" onclick="openSheet('sub')">
       <div class="field-icon" style="color:#8B5CF6;">📘</div>
       <div class="field-content">
         <div class="field-label-sm">Sottocategoria</div>
         <div class="field-value-text placeholder" id="subLabel">Seleziona sottocategoria</div>
       </div>
-      <div class="field-arrow">&#8250;</div>
+      <div class="field-arrow">›</div>
     </div>
 
-    <!-- CONTO ORIGINE -->
     <div class="field-row" id="fieldConto" onclick="openSheet('conto')">
       <div class="field-icon">💳</div>
       <div class="field-content">
         <div class="field-label-sm" id="contoLabel-title">Conto / Carta</div>
         <div class="field-value-text placeholder" id="contoLabel">Seleziona conto</div>
       </div>
-      <div class="field-arrow">&#8250;</div>
+      <div class="field-arrow">›</div>
     </div>
 
-    <!-- CONTO DESTINAZIONE (solo Trasferimento) -->
-    <div class="field-row locked" id="fieldContoDestinazione" onclick="openSheet('contoDest')">
+    <div class="field-row" id="fieldContoDestinazione" onclick="openSheet('contoDest')" style="display:none">
       <div class="field-icon">🏦</div>
       <div class="field-content">
         <div class="field-label-sm">Conto Destinazione</div>
         <div class="field-value-text placeholder" id="contoDestLabel">Seleziona conto di arrivo</div>
       </div>
-      <div class="field-arrow">&#8250;</div>
+      <div class="field-arrow">›</div>
     </div>
 
-    <!-- DESTINAZIONE (nascosta per Trasferimento) -->
     <div class="field-row" id="fieldDest" onclick="openSheet('dest')">
       <div class="field-icon">🏛️</div>
       <div class="field-content">
         <div class="field-label-sm">Destinazione</div>
         <div class="field-value-text placeholder" id="destLabel">Seleziona destinazione</div>
       </div>
-      <div class="field-arrow">&#8250;</div>
+      <div class="field-arrow">›</div>
     </div>
 
-    <!-- NOTE -->
     <div class="note-field">
       <div class="field-icon">✏️</div>
-      <input class="note-input" id="noteInput" type="text" placeholder="Nota (opzionale)" maxlength="120">
+      <input class="note-input" id="noteInput" type="text" placeholder="Nota (opzionale)">
     </div>
   </div>
 
@@ -492,555 +472,234 @@
       <button class="key" onclick="key('9')">9</button>
       <button class="key" onclick="key(',')">,</button>
       <button class="key" onclick="key('0')">0</button>
-      <button class="key del" onclick="del()">&#9003;</button>
+      <button class="key del" onclick="del()">⌫</button>
       <button class="key save" id="saveBtn" onclick="salva()">Salva transazione</button>
     </div>
   </div>
-
   <div class="safe-bottom"></div>
 </div>
 
-<!-- OVERLAY -->
 <div class="overlay" id="overlay" onclick="closeSheet()"></div>
 
-<!-- BOTTOM SHEETS -->
 <div class="sheet" id="sheetCat">
   <div class="sheet-handle"></div>
-  <div class="sheet-header">
-    <div class="sheet-title-text">Categoria</div>
-    <button class="sheet-close" onclick="closeSheet()">&#10005;</button>
-  </div>
+  <div class="sheet-header"><div class="sheet-title-text">Categoria</div><button class="sheet-close" onclick="closeSheet()">✕</button></div>
   <div class="sheet-list" id="listCat"></div>
 </div>
-
 <div class="sheet" id="sheetSub">
   <div class="sheet-handle"></div>
-  <div class="sheet-header">
-    <div class="sheet-title-text">Sottocategoria</div>
-    <button class="sheet-close" onclick="closeSheet()">&#10005;</button>
-  </div>
+  <div class="sheet-header"><div class="sheet-title-text">Sottocategoria</div><button class="sheet-close" onclick="closeSheet()">✕</button></div>
   <div class="sheet-list" id="listSub"></div>
 </div>
-
 <div class="sheet" id="sheetConto">
   <div class="sheet-handle"></div>
-  <div class="sheet-header">
-    <div class="sheet-title-text">Conto / Carta</div>
-    <button class="sheet-close" onclick="closeSheet()">&#10005;</button>
-  </div>
+  <div class="sheet-header"><div class="sheet-title-text">Conto</div><button class="sheet-close" onclick="closeSheet()">✕</button></div>
   <div class="sheet-list" id="listConto"></div>
 </div>
-
 <div class="sheet" id="sheetDest">
   <div class="sheet-handle"></div>
-  <div class="sheet-header">
-    <div class="sheet-title-text">Destinazione</div>
-    <button class="sheet-close" onclick="closeSheet()">&#10005;</button>
-  </div>
+  <div class="sheet-header"><div class="sheet-title-text">Destinazione</div><button class="sheet-close" onclick="closeSheet()">✕</button></div>
   <div class="sheet-list" id="listDest"></div>
 </div>
-
 <div class="sheet" id="sheetContoDest">
   <div class="sheet-handle"></div>
-  <div class="sheet-header">
-    <div class="sheet-title-text">Conto Destinazione</div>
-    <button class="sheet-close" onclick="closeSheet()">&#10005;</button>
-  </div>
+  <div class="sheet-header"><div class="sheet-title-text">Conto Destinazione</div><button class="sheet-close" onclick="closeSheet()">✕</button></div>
   <div class="sheet-list" id="listContoDest"></div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script src="config.js"></script>
 <script>
-// ================================================================
-//  CONFIGURAZIONE CATEGORIE E SOTTOCATEGORIE
-// ================================================================
-// CATEGORIE e CONFIG sono definiti in config.js (caricato prima di questo script)
+let state = { tipo: 'Uscita', amount: '0', categoria: '', sottocategoria: '', conto: '', contoDestinazione: '', destinazione: '', dataSpesa: '' };
+let activeSheet = null;
 
-// ================================================================
-//  AUDIO ENGINE — Web Audio API
-// ================================================================
 const AudioEngine = {
   ctx: null,
-  unlocked: false,
-
-  init() {
-    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-    // Unlock su primo touch (iOS richiede interazione utente)
-    const unlock = () => {
-      if (this.ctx.state === 'suspended') this.ctx.resume();
-      this.unlocked = true;
-    };
-    document.addEventListener('touchstart', unlock, { once: true });
-    document.addEventListener('click', unlock, { once: true });
-  },
-
+  init() { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
   play(freq, type, duration, vol = 0.08) {
     if (!this.ctx) this.init();
     if (this.ctx.state === 'suspended') this.ctx.resume();
-
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-
-    osc.frequency.value = freq;
-    osc.type = type;
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    osc.frequency.value = freq; osc.type = type;
     gain.gain.setValueAtTime(vol, this.ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-
-    osc.start(this.ctx.currentTime);
-    osc.stop(this.ctx.currentTime + duration);
+    osc.start(); osc.stop(this.ctx.currentTime + duration);
   },
-
-  click()   { this.play(900, 'triangle', 0.06, 0.35); },
-  pop()     { this.play(700, 'sine',     0.10, 0.40); },
-  success() {
-    this.play(880,  'sine', 0.15, 0.35);
-    setTimeout(() => this.play(1100, 'sine', 0.18, 0.30), 80);
-    setTimeout(() => this.play(1320, 'sine', 0.22, 0.25), 160);
-  },
-  error() {
-    this.play(200, 'sawtooth', 0.30, 0.10);
-    setTimeout(() => this.play(150, 'sawtooth', 0.35, 0.08), 100);
-  },
-  delete() {
-    // Suono discendente — chiaramente diverso dai tasti numerici
-    this.play(600, 'triangle', 0.08, 0.30);
-    setTimeout(() => this.play(400, 'triangle', 0.06, 0.25), 60);
-  }
+  click() { this.play(900, 'triangle', 0.06, 0.35); },
+  pop() { this.play(700, 'sine', 0.10, 0.40); },
+  success() { this.play(880, 'sine', 0.15, 0.35); },
+  error() { this.play(150, 'sawtooth', 0.30, 0.10); },
+  delete() { this.play(600, 'triangle', 0.08, 0.30); }
 };
 
-// ================================================================
-//  HAPTIC ENGINE
-// ================================================================
 const Haptic = {
-  click()   { if (navigator.vibrate) navigator.vibrate(5); },
-  pop()     { if (navigator.vibrate) navigator.vibrate(8); },
+  click() { if (navigator.vibrate) navigator.vibrate(5); },
+  pop() { if (navigator.vibrate) navigator.vibrate(8); },
   success() { if (navigator.vibrate) navigator.vibrate([30, 40, 30]); },
-  error()   { if (navigator.vibrate) navigator.vibrate([60, 30, 60, 30, 100]); },
-  delete()  { if (navigator.vibrate) navigator.vibrate(12); }
+  error() { if (navigator.vibrate) navigator.vibrate(60); },
+  delete() { if (navigator.vibrate) navigator.vibrate(12); }
 };
 
-// ================================================================
-//  STATE
-// ================================================================
-let state = {
-  tipo: 'Uscita',
-  amount: '0',
-  categoria: '',
-  sottocategoria: '',
-  conto: '',
-  contoDestinazione: '',
-  destinazione: '',
-  dataSpesa: '', // formato YYYY-MM-DD
-};
-
-let activeSheet = null;
-
-// Helpers data
-function todayISO() {
-  const d = new Date();
-  return d.toISOString().split('T')[0]; // YYYY-MM-DD
-}
+function todayISO() { return new Date().toISOString().split('T')[0]; }
 function formatDateIT(iso) {
-  const [y, m, d] = iso.split('-');
-  const days = ['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
-  const months = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
-  const dt = new Date(iso);
-  return `${days[dt.getDay()]} ${parseInt(d)} ${months[parseInt(m)-1]}`;
-}
-function onDateChange() {
-  const val = document.getElementById('dataInput').value;
-  if (val) {
-    state.dataSpesa = val;
-    document.getElementById('dataLabel').textContent = formatDateIT(val);
-  }
+  if(!iso) return "";
+  const d = new Date(iso);
+  return d.toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long'});
 }
 
-// ================================================================
-//  INIT
-// ================================================================
+function onDateChange() {
+  state.dataSpesa = document.getElementById('dataInput').value;
+  document.getElementById('dataLabel').textContent = formatDateIT(state.dataSpesa);
+}
+
 function init() {
   AudioEngine.init();
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  }
-
   const now = new Date();
-  document.getElementById('headerDate').textContent =
-    now.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
-
-  // Precompila data spesa con oggi
+  document.getElementById('headerDate').textContent = now.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
   state.dataSpesa = todayISO();
   document.getElementById('dataInput').value = state.dataSpesa;
   document.getElementById('dataLabel').textContent = formatDateIT(state.dataSpesa);
 
   const url = localStorage.getItem('appsScriptUrl');
-  if (!url) {
-    document.getElementById('configScreen').classList.add('show');
-  } else {
-    document.getElementById('mainApp').style.display = 'flex';
-  }
+  if (!url) document.getElementById('configScreen').classList.add('show');
+  else document.getElementById('mainApp').style.display = 'flex';
 
-  // --- AGGIORNAMENTO QUI ---
   buildCatList();
   buildList('listConto', CONFIG.conti, 'conto');
   buildList('listDest', CONFIG.destinazioni, 'destinazione');
-  
-  // Aggiungiamo questa riga per popolare i conti di destinazione nei trasferimenti
-  buildList('listContoDest', CONFIG.conti, 'contoDestinazione'); 
-  // -------------------------
+  buildList('listContoDest', CONFIG.conti, 'contoDestinazione');
 }
 
-// ================================================================
-//  CONFIG
-// ================================================================
 function saveConfig() {
   const url = document.getElementById('cfgUrl').value.trim();
-  if (!url.startsWith('https://script.google.com')) {
-    showToast('URL non valido', 'error'); 
-    AudioEngine.error(); Haptic.error();
-    return;
+  if (url.startsWith('https://script.google.com')) {
+    localStorage.setItem('appsScriptUrl', url);
+    location.reload();
   }
-  localStorage.setItem('appsScriptUrl', url);
-  document.getElementById('configScreen').classList.remove('show');
-  document.getElementById('mainApp').style.display = 'flex';
-  AudioEngine.success(); Haptic.success();
 }
 
-function openConfig() {
-  document.getElementById('cfgUrl').value = localStorage.getItem('appsScriptUrl') || '';
-  document.getElementById('configScreen').classList.add('show');
-}
+function openConfig() { document.getElementById('configScreen').classList.add('show'); }
 
-// ================================================================
-//  TIPO
-// ================================================================
 function setTipo(t) {
   state.tipo = t;
-  state.categoria = '';
-  state.sottocategoria = '';
-  state.contoDestinazione = '';
-
-  document.getElementById('btnUscita').className  = t === 'Uscita'         ? 'tipo-btn active-uscita'         : 'tipo-btn inactive';
-  document.getElementById('btnEntrata').className = t === 'Entrata'        ? 'tipo-btn active-entrata'        : 'tipo-btn inactive';
-  document.getElementById('btnTrasf').className   = t === 'Trasferimento'  ? 'tipo-btn active-trasferimento'  : 'tipo-btn inactive';
-
-  const accentMap = {
-    'Uscita':        'var(--accent-uscita)',
-    'Entrata':       'var(--accent-entrata)',
-    'Trasferimento': 'var(--accent-trasf)'
-  };
-  document.documentElement.style.setProperty('--accent', accentMap[t]);
-
+  document.getElementById('btnUscita').className = t === 'Uscita' ? 'tipo-btn active-uscita' : 'tipo-btn inactive';
+  document.getElementById('btnEntrata').className = t === 'Entrata' ? 'tipo-btn active-entrata' : 'tipo-btn inactive';
+  document.getElementById('btnTrasf').className = t === 'Trasferimento' ? 'tipo-btn active-trasferimento' : 'tipo-btn inactive';
+  
   const isTrasf = t === 'Trasferimento';
-
-  // Mostra/nascondi campi in base al tipo
-  document.getElementById('fieldCat').style.display         = isTrasf ? 'none' : 'flex';
-  document.getElementById('fieldSub').style.display         = isTrasf ? 'none' : 'flex';
-  document.getElementById('fieldDest').style.display        = isTrasf ? 'none' : 'flex';
+  document.getElementById('fieldCat').style.display = isTrasf ? 'none' : 'flex';
+  document.getElementById('fieldSub').style.display = isTrasf ? 'none' : 'flex';
+  document.getElementById('fieldDest').style.display = isTrasf ? 'none' : 'flex';
   document.getElementById('fieldContoDestinazione').style.display = isTrasf ? 'flex' : 'none';
-
-  // Se trasferimento sblocca subito conto destinazione
-  if (isTrasf) {
-    document.getElementById('fieldContoDestinazione').classList.remove('locked');
-  } else {
-    document.getElementById('fieldContoDestinazione').classList.add('locked');
-  }
-
-  // Label conto origine
   document.getElementById('contoLabel-title').textContent = isTrasf ? 'Conto Origine' : 'Conto / Carta';
-
-  // Reset conto destinazione
-  const cdl = document.getElementById('contoDestLabel');
-  cdl.textContent = 'Seleziona conto di arrivo';
-  cdl.classList.add('placeholder');
-  document.getElementById('fieldContoDestinazione').classList.remove('filled');
-
-  // Reset categoria
-  document.getElementById('catLabel').textContent = 'Seleziona categoria';
-  document.getElementById('catLabel').classList.add('placeholder');
-  document.getElementById('fieldCat').classList.remove('filled');
-  document.getElementById('subLabel').textContent = 'Seleziona sottocategoria';
-  document.getElementById('subLabel').classList.add('placeholder');
-  document.getElementById('fieldSub').classList.remove('filled');
-
-  if (!isTrasf) buildCatList();
-  updateAmountColor();
+  
+  document.documentElement.style.setProperty('--accent', isTrasf ? 'var(--accent-trasf)' : (t === 'Entrata' ? 'var(--accent-entrata)' : 'var(--accent-uscita)'));
   AudioEngine.pop(); Haptic.pop();
 }
 
-// ================================================================
-//  AMOUNT
-// ================================================================
 function key(k) {
   if (k === ',' && state.amount.includes(',')) return;
-  if (k === ',' && state.amount === '0') { state.amount = '0,'; renderAmount(); AudioEngine.click(); Haptic.click(); return; }
-  if (state.amount.replace(',','').replace(/\./g,'').length >= 8) return;
-  state.amount = state.amount === '0' && k !== ',' ? k : state.amount + k;
-  renderAmount();
-  AudioEngine.click(); Haptic.click();
+  state.amount = state.amount === '0' ? k : state.amount + k;
+  renderAmount(); AudioEngine.click(); Haptic.click();
 }
 
 function del() {
   state.amount = state.amount.length > 1 ? state.amount.slice(0, -1) : '0';
-  renderAmount();
-  AudioEngine.delete(); Haptic.delete();
+  renderAmount(); AudioEngine.delete(); Haptic.delete();
 }
 
 function renderAmount() {
-  const parts = state.amount.split(',');
-  const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  const display = parts.length > 1 ? intPart + ',' + parts[1] : intPart;
-  document.getElementById('amountVal').textContent = display;
-  updateAmountColor();
+  document.getElementById('amountVal').textContent = state.amount;
+  document.getElementById('amountDisplay').classList.toggle('has-value', parseFloat(state.amount.replace(',','.')) > 0);
 }
 
-function getAmountFloat() {
-  return parseFloat(state.amount.replace(',', '.')) || 0;
-}
-
-function updateAmountColor() {
-  const display = document.getElementById('amountDisplay');
-  display.classList.toggle('has-value', getAmountFloat() > 0);
-}
-
-// ================================================================
-//  BOTTOM SHEETS
-// ================================================================
 function buildCatList() {
-  const cats = Object.keys(CATEGORIE[state.tipo]);
-  const items = cats.map(c => {
-    const icons = {
-      Casa: '&#127968;', Cibo: '&#127860;', Trasporti: '&#128663;', Abbonamenti: '&#128241;',
-      Svago: '&#127909;', Salute: '&#10084;', Investimenti: '&#128200;', Tasse: '&#127963;',
-      Lavoro: '&#128188;', Altro: '&#8226;',
-      Stipendio: '&#128176;', Bonus: '&#127919;', 'Rimborso Lavoro': '&#128203;', 
-      'Affitto Percepito': '&#127968;', Dividendi: '&#128202;', Interessi: '&#127974;',
-      Vendite: '&#129309;', Regalo: '&#127873;'
-    };
-    return { label: c, icon: icons[c] || '&#8226;' };
-  });
+  const cats = Object.keys(CATEGORIE[state.tipo] || {});
+  const items = cats.map(c => ({ label: c, icon: '📗' }));
   buildList('listCat', items, 'categoria');
-}
-
-function buildSubList() {
-  if (!state.categoria) return;
-  const subs = CATEGORIE[state.tipo][state.categoria] || [];
-  const items = subs.map(s => ({ label: s, icon: '🔹' }));
-  buildList('listSub', items, 'sottocategoria');
 }
 
 function buildList(containerId, items, stateKey) {
   const el = document.getElementById(containerId);
   el.innerHTML = items.map(item => `
-    <div class="sheet-item ${state[stateKey] === item.label ? 'selected' : ''}"
-         onclick="pickItem('${stateKey}','${item.label}')">
-      <div class="sheet-item-icon">${item.icon}</div>
+    <div class="sheet-item ${state[stateKey] === item.label ? 'selected' : ''}" onclick="pickItem('${stateKey}','${item.label}')">
+      <div class="sheet-item-icon">${item.icon || '•'}</div>
       <div class="sheet-item-text">${item.label}</div>
-      <div class="sheet-item-check">&#10003;</div>
     </div>
   `).join('');
 }
 
-function openSheet(which) {
-  if (which === 'sub' && !state.categoria) {
-    showToast('Seleziona prima una categoria', 'error');
-    AudioEngine.error(); Haptic.error();
-    return;
+function pickItem(stateKey, value) {
+  state[stateKey] = value;
+  const map = { categoria: 'catLabel', sottocategoria: 'subLabel', conto: 'contoLabel', contoDestinazione: 'contoDestLabel', destinazione: 'destLabel' };
+  const label = document.getElementById(map[stateKey]);
+  label.textContent = value;
+  label.classList.remove('placeholder');
+  document.getElementById('field' + stateKey.charAt(0).toUpperCase() + stateKey.slice(1)).classList.add('filled');
+  
+  if (stateKey === 'categoria') {
+    const subs = CATEGORIE[state.tipo][value] || [];
+    buildList('listSub', subs.map(s => ({ label: s, icon: '📘' })), 'sottocategoria');
+    openSheet('sub');
+  } else {
+    closeSheet();
   }
-  if (which === 'sub') buildSubList();
+}
 
-  activeSheet = which;
+function openSheet(id) {
+  activeSheet = id;
   const sheetMap = { cat: 'sheetCat', sub: 'sheetSub', conto: 'sheetConto', dest: 'sheetDest', contoDest: 'sheetContoDest' };
-  document.getElementById(sheetMap[which]).classList.add('open');
+  document.getElementById(sheetMap[id]).classList.add('open');
   document.getElementById('overlay').classList.add('show');
-  AudioEngine.pop(); Haptic.pop();
 }
 
 function closeSheet() {
-  ['sheetCat','sheetSub','sheetConto','sheetDest','sheetContoDest'].forEach(id =>
-    document.getElementById(id).classList.remove('open'));
+  document.querySelectorAll('.sheet').forEach(s => s.classList.remove('open'));
   document.getElementById('overlay').classList.remove('show');
-  activeSheet = null;
 }
 
-function pickItem(stateKey, value) {
-  state[stateKey] = value;
-
-  const labelMap = {
-    categoria:          { labelId: 'catLabel',      fieldId: 'fieldCat' },
-    sottocategoria:     { labelId: 'subLabel',       fieldId: 'fieldSub' },
-    conto:              { labelId: 'contoLabel',     fieldId: 'fieldConto' },
-    contoDestinazione:  { labelId: 'contoDestLabel', fieldId: 'fieldContoDestinazione' },
-    destinazione:       { labelId: 'destLabel',      fieldId: 'fieldDest' },
-  };
-  const m = labelMap[stateKey];
-  const label = document.getElementById(m.labelId);
-  label.textContent = value;
-  label.classList.remove('placeholder');
-  document.getElementById(m.fieldId).classList.add('filled');
-
-  // Rebuild lista per aggiornare checkmark
-  if (stateKey === 'conto')             buildList('listConto',     CONFIG.conti,        'conto');
-  if (stateKey === 'contoDestinazione') buildList('listContoDest', CONFIG.conti,        'contoDestinazione');
-  if (stateKey === 'destinazione')      buildList('listDest',      CONFIG.destinazioni,  'destinazione');
-
-  // Se cambio categoria, reset sottocategoria e ricostruisci lista cat
-  if (stateKey === 'categoria') {
-    state.sottocategoria = '';
-    document.getElementById('subLabel').textContent = 'Seleziona sottocategoria';
-    document.getElementById('subLabel').classList.add('placeholder');
-    document.getElementById('fieldSub').classList.remove('filled');
-    buildCatList();
-  }
-
-  AudioEngine.pop(); Haptic.pop();
-  setTimeout(closeSheet, 180);
-}
-
-// ================================================================
-//  SALVA
-// ================================================================
 async function salva() {
-  const amount = getAmountFloat();
-  if (!amount || amount === 0) { 
-    showToast('Inserisci un importo', 'error'); 
-    AudioEngine.error(); Haptic.error();
-    return; 
-  }
+  const val = parseFloat(state.amount.replace(',', '.'));
+  if (!val) { showToast('Inserisci importo', 'error'); return; }
   
-  // ================================================================
-//  SALVA (Versione Compatibile)
-// ================================================================
-async function salva() {
-  const amount = getAmountFloat();
-  if (!amount || amount === 0) { 
-    showToast('Inserisci un importo', 'error'); 
-    AudioEngine.error(); Haptic.error();
-    return; 
-  }
-
-  // Validazioni
-  if (state.tipo === 'Trasferimento') {
-    if (!state.conto || !state.contoDestinazione) {
-      showToast('Seleziona entrambi i conti', 'error');
-      AudioEngine.error(); return;
-    }
-  } else {
-    if (!state.categoria || !state.conto) {
-      showToast('Mancano dati obbligatori', 'error');
-      AudioEngine.error(); return;
-    }
-  }
-
   const btn = document.getElementById('saveBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>...';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Salvataggio...';
 
-  const importoConSegno = state.tipo === 'Uscita' ? -amount : amount;
-
-  // Questo pacchetto deve corrispondere alle colonne del tuo Script
   const payload = {
-    timestamp:          new Date().toISOString(),
-    dataSpesa:          state.dataSpesa,
-    importo:            importoConSegno,
-    tipo:               state.tipo,
-    categoria:          state.tipo === 'Trasferimento' ? 'Trasferimento' : (state.categoria || ''),
-    sottocategoria:     state.tipo === 'Trasferimento' ? '-' : (state.sottocategoria || ''),
-    conto:              state.conto || '',
-    contoDestinazione:  state.tipo === 'Trasferimento' ? state.contoDestinazione : '',
-    destinazione:       state.tipo === 'Trasferimento' ? '-' : (state.destinazione || ''),
-    note:               document.getElementById('noteInput').value.trim(),
-    fonte:              'iPhone'
+    timestamp: new Date().toISOString(),
+    dataSpesa: state.dataSpesa,
+    importo: state.tipo === 'Uscita' ? -val : val,
+    tipo: state.tipo,
+    categoria: state.tipo === 'Trasferimento' ? 'Trasferimento' : state.categoria,
+    sottocategoria: state.tipo === 'Trasferimento' ? '-' : state.sottocategoria,
+    conto: state.conto,
+    contoDestinazione: state.tipo === 'Trasferimento' ? state.contoDestinazione : '',
+    destinazione: state.tipo === 'Trasferimento' ? '-' : state.destinazione,
+    note: document.getElementById('noteInput').value.trim(),
+    fonte: 'iPhone'
   };
 
   try {
-    const url = localStorage.getItem('appsScriptUrl');
-    
-    // Metodo semplificato per massimizzare la compatibilità con Apps Script
-    await fetch(url, {
-      method: 'POST',
-      mode: 'no-cors',
-      cache: 'no-cache',
-      body: JSON.stringify(payload)
-    });
-
-    // Se arriviamo qui, il browser ha inviato il pacchetto
+    await fetch(localStorage.getItem('appsScriptUrl'), { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
     AudioEngine.success(); Haptic.success();
-    showToast('&#10003; Inviato al foglio', 'success');
-    resetForm();
-  } catch (err) {
-    console.error(err);
-    showToast('Errore di rete', 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Salva transazione';
+    showToast('Salvato!', 'success');
+    setTimeout(() => location.reload(), 1000);
+  } catch (e) {
+    showToast('Errore!', 'error');
+    btn.disabled = false; btn.textContent = 'Salva transazione';
   }
 }
 
-function resetForm() {
-  state.amount = '0';
-  state.categoria = '';
-  state.sottocategoria = '';
-  state.conto = '';
-  state.destinazione = '';
-  state.dataSpesa = todayISO();
-
-  document.getElementById('dataInput').value = state.dataSpesa;
-  document.getElementById('dataLabel').textContent = formatDateIT(state.dataSpesa);
-  document.getElementById('amountVal').textContent = '0';
-  document.getElementById('amountDisplay').classList.remove('has-value');
-  document.getElementById('noteInput').value = '';
-
-  ['catLabel','subLabel','contoLabel','destLabel'].forEach(id => {
-    const el = document.getElementById(id);
-    el.classList.add('placeholder');
-  });
-  document.getElementById('catLabel').textContent = 'Seleziona categoria';
-  document.getElementById('subLabel').textContent = 'Seleziona sottocategoria';
-  document.getElementById('contoLabel').textContent = 'Seleziona conto';
-  document.getElementById('destLabel').textContent = 'Seleziona destinazione';
-
-  state.contoDestinazione = '';
-  ['fieldCat','fieldSub','fieldConto','fieldDest','fieldContoDestinazione'].forEach(id =>
-    document.getElementById(id).classList.remove('filled'));
-
-  const cdl = document.getElementById('contoDestLabel');
-  cdl.textContent = 'Seleziona conto di arrivo';
-  cdl.classList.add('placeholder');
-
-  // Ricarica le liste
-  buildCatList();
-  buildList('listConto', CONFIG.conti, 'conto');
-  buildList('listContoDest', CONFIG.conti, 'contoDestinazione');
-  buildList('listDest', CONFIG.destinazioni, 'destinazione');
+function showToast(m, t) {
+  const el = document.getElementById('toast');
+  el.textContent = m; el.className = 'toast show ' + t;
+  setTimeout(() => el.classList.remove('show'), 3000);
 }
 
-// ================================================================
-//  UTILS
-// ================================================================
-function showToast(msg, type = '') {
-  const t = document.getElementById('toast');
-  t.innerHTML = msg;
-  t.className = 'toast show ' + type;
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 2800);
-}
-
-// Assicuriamoci che init chiami buildList per il conto destinazione
-const originalInit = init;
-init = function() {
-  originalInit();
-  buildList('listContoDest', CONFIG.conti, 'contoDestinazione');
-};
-
-init();
+window.onload = init;
 </script>
 </body>
 </html>
-
