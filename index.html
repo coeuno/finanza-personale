@@ -877,16 +877,14 @@ async function salva() {
     AudioEngine.error(); Haptic.error();
     return; 
   }
+
+  // Controlli validazione
   if (state.tipo !== 'Trasferimento' && !state.categoria)
     { showToast('Seleziona una categoria', 'error'); AudioEngine.error(); Haptic.error(); return; }
-  if (state.tipo !== 'Trasferimento' && !state.sottocategoria)
-    { showToast('Seleziona una sottocategoria', 'error'); AudioEngine.error(); Haptic.error(); return; }
   if (!state.conto)
     { showToast('Seleziona il conto', 'error'); AudioEngine.error(); Haptic.error(); return; }
   if (state.tipo === 'Trasferimento' && !state.contoDestinazione)
     { showToast('Seleziona il conto di arrivo', 'error'); AudioEngine.error(); Haptic.error(); return; }
-  if (state.tipo !== 'Trasferimento' && !state.destinazione)
-    { showToast('Seleziona la destinazione', 'error'); AudioEngine.error(); Haptic.error(); return; }
 
   const btn = document.getElementById('saveBtn');
   btn.disabled = true;
@@ -894,6 +892,7 @@ async function salva() {
 
   const importoConSegno = state.tipo === 'Uscita' ? -amount : amount;
 
+  // Questo oggetto deve corrispondere a ciò che lo script si aspetta
   const payload = {
     timestamp:          new Date().toISOString(),
     dataSpesa:          state.dataSpesa,
@@ -902,7 +901,8 @@ async function salva() {
     categoria:          state.tipo === 'Trasferimento' ? 'Trasferimento' : state.categoria,
     sottocategoria:     state.tipo === 'Trasferimento' ? '-' : state.sottocategoria,
     conto:              state.conto,
-    contoDestinazione:  state.tipo === 'Trasferimento' ? state.contoDestinazione : '',
+    // ASSICURATI CHE IL NOME 'contoDestinazione' SIA UGUALE NEL FILE .GS
+    contoDestinazione:  state.tipo === 'Trasferimento' ? state.contoDestinazione : '', 
     destinazione:       state.tipo === 'Trasferimento' ? '-' : state.destinazione,
     note:               document.getElementById('noteInput').value.trim(),
     fonte:              'iPhone'
@@ -912,7 +912,7 @@ async function salva() {
     const url = localStorage.getItem('appsScriptUrl');
     await fetch(url, {
       method: 'POST',
-      mode: 'no-cors',
+      mode: 'no-cors', // Importante: mode no-cors non permette di leggere la risposta ma invia i dati
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
@@ -921,6 +921,7 @@ async function salva() {
     showToast('&#10003; Transazione salvata', 'success');
     resetForm();
   } catch (err) {
+    console.error(err);
     AudioEngine.error(); Haptic.error();
     showToast('Errore di connessione', 'error');
   } finally {
