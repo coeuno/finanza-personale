@@ -72,9 +72,7 @@
       cursor: pointer;
     }
 
-    .data-wrap { padding: 0 20px 4px; }
-    .data-row { display: flex; align-items: center; background: var(--bg-field); border-radius: var(--radius-sm); padding: 0 14px; height: 44px; cursor: pointer; gap: 12px; }
-    .date-input-hidden { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
+    .tipo-wrap { padding: 8px 20px; }
     .tipo-toggle {
       display: flex;
       background: var(--bg-field);
@@ -91,12 +89,15 @@
       font-weight: 600;
       cursor: pointer;
       transition: background .2s, color .2s;
-      letter-spacing: -0.2px;
     }
     .tipo-btn.active-uscita      { background: var(--accent-uscita);  color: #fff; }
     .tipo-btn.active-entrata     { background: var(--accent-entrata); color: #fff; }
     .tipo-btn.active-trasferimento { background: var(--accent-trasf); color: #fff; }
     .tipo-btn.inactive { background: transparent; color: var(--text-muted); }
+
+    .data-wrap { padding: 0 20px 4px; }
+    .data-row { display: flex; align-items: center; background: var(--bg-field); border-radius: var(--radius-sm); padding: 0 14px; height: 44px; cursor: pointer; gap: 12px; }
+    .date-input-hidden { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
 
     .amount-wrap {
       padding: 8px 20px 16px;
@@ -109,12 +110,11 @@
       letter-spacing: -2px;
       color: var(--text-primary);
       line-height: 1;
-      transition: color .2s;
     }
-    .amount-display .currency { font-size: 28px; font-weight: 300; color: var(--text-secondary); margin-right: 2px; vertical-align: super; }
+    .amount-display .currency { font-size: 28px; font-weight: 300; color: var(--text-secondary); vertical-align: super; }
     .amount-display.has-value { color: var(--accent); }
 
-    .fields { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; overflow: hidden; }
+    .fields { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; overflow-y: auto; }
 
     .field-row {
       display: flex;
@@ -125,278 +125,58 @@
       height: 50px;
       cursor: pointer;
       border: 1.5px solid transparent;
-      transition: border-color .15s;
       gap: 12px;
     }
-    .field-row:active { opacity: .8; }
     .field-row.filled { border-color: var(--border); }
 
-    .field-icon { font-size: 16px; flex-shrink: 0; width: 20px; text-align: center; }
+    .field-icon { font-size: 16px; width: 20px; text-align: center; }
     .field-content { flex: 1; min-width: 0; }
-    .field-label-sm { font-size: 13px; color: var(--text-primary); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 2px; font-weight: 700; }
+    .field-label-sm { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 2px; }
     .field-value-text { font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .field-value-text.placeholder { color: rgba(255,255,255,0.30); }
-    .field-arrow { color: var(--text-muted); font-size: 18px; flex-shrink: 0; }
+    .field-value-text.placeholder { color: var(--text-muted); }
 
-    .note-field {
-      background: var(--bg-field);
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .note-input {
-      flex: 1;
-      background: none;
-      border: none;
-      outline: none;
-      color: var(--text-primary);
-      font-size: 14px;
-      font-family: inherit;
-      caret-color: var(--accent);
-    }
-    .note-input::placeholder { color: var(--text-muted); }
+    .note-field { background: var(--bg-field); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+    .note-input { flex: 1; background: none; border: none; color: #fff; font-size: 14px; outline: none; }
 
-    .numpad {
-      padding: 12px 16px;
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
-    }
-    .numpad-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-    .key {
-      background: var(--bg-card);
-      border: none;
-      border-radius: var(--radius-sm);
-      color: var(--text-primary);
-      font-size: 20px;
-      font-weight: 400;
-      height: 54px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform .08s, background .08s;
-      font-family: inherit;
-      letter-spacing: -0.5px;
-    }
-    .key:active { transform: scale(.93); background: #333; }
-    .key.del { background: var(--bg-field); font-size: 18px; }
-    .key.del:active { background: #333; }
-    .key.save {
-      grid-column: span 3;
-      background: var(--accent);
-      color: #fff;
-      font-size: 16px;
-      font-weight: 600;
-      height: 54px;
-      border-radius: var(--radius-md);
-      letter-spacing: -0.3px;
-    }
-    .key.save:active { transform: scale(.98); opacity: .9; }
-    .key.save:disabled { opacity: .35; cursor: default; transform: none; }
+    .numpad { padding: 12px 16px; }
+    .numpad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .key { background: var(--bg-card); border: none; border-radius: var(--radius-sm); color: #fff; font-size: 20px; height: 54px; cursor: pointer; }
+    .key:active { background: #333; }
+    .key.save { grid-column: span 3; background: var(--accent); font-weight: 600; height: 54px; border-radius: var(--radius-md); }
 
-    .overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.6);
-      z-index: 50;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .25s;
-    }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 50; opacity: 0; pointer-events: none; transition: opacity .25s; }
     .overlay.show { opacity: 1; pointer-events: all; }
 
-    .sheet {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: var(--bg-sheet);
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-      z-index: 100;
-      transform: translateY(100%);
-      transition: transform .3s cubic-bezier(.32,.72,0,1);
-      max-height: 72vh;
-      display: flex;
-      flex-direction: column;
-      padding-bottom: env(safe-area-inset-bottom, 0);
-    }
+    .sheet { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-sheet); border-radius: 20px 20px 0 0; z-index: 100; transform: translateY(100%); transition: transform .3s; max-height: 70vh; display: flex; flex-direction: column; }
     .sheet.open { transform: translateY(0); }
-
-    .sheet-handle {
-      width: 40px; height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      margin: 12px auto 4px;
-      flex-shrink: 0;
-    }
-    .sheet-header {
-      padding: 8px 20px 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-shrink: 0;
-    }
-    .sheet-title-text { font-size: 16px; font-weight: 600; }
-    .sheet-close {
-      background: var(--bg-field);
-      border: none;
-      color: var(--text-secondary);
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      font-size: 16px;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    .sheet-list { overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
-
-    .sheet-item {
-      display: flex;
-      align-items: center;
-      padding: 0 20px;
-      height: 64px;
-      cursor: pointer;
-      border-bottom: 1px solid var(--border);
-      gap: 16px;
-      transition: background .1s;
-    }
-    .sheet-item:active { background: var(--bg-field); }
-    .sheet-item:last-child { border-bottom: none; }
-    .sheet-item-icon { font-size: 22px; width: 30px; text-align: center; flex-shrink: 0; }
-    .sheet-item-text { flex: 1; font-size: 18px; color: var(--text-primary); }
-    .sheet-item-check {
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      background: var(--accent);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px;
-      color: #fff;
-      opacity: 0;
-      flex-shrink: 0;
-    }
+    .sheet-header { padding: 16px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .sheet-list { overflow-y: auto; }
+    .sheet-item { display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); gap: 16px; }
+    .sheet-item-text { flex: 1; font-size: 16px; }
+    .sheet-item-check { color: var(--accent); opacity: 0; }
     .sheet-item.selected .sheet-item-check { opacity: 1; }
-    .sheet-item.selected .sheet-item-text { color: var(--accent); font-weight: 500; }
 
-    .toast {
-      position: fixed;
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
-      left: 50%; transform: translateX(-50%) translateY(20px);
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 14px 24px;
-      font-size: 14px;
-      color: var(--text-primary);
-      white-space: nowrap;
-      z-index: 200;
-      opacity: 0;
-      transition: opacity .2s, transform .2s;
-      text-align: center;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .toast.success { border-color: var(--accent-entrata); color: var(--accent-entrata); }
-    .toast.error   { border-color: var(--accent-uscita); color: var(--accent-uscita); }
-
-    .spinner {
-      display: inline-block;
-      width: 16px; height: 16px;
-      border: 2px solid rgba(255,255,255,.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      vertical-align: middle;
-      margin-right: 6px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .config-screen {
-      position: fixed; inset: 0;
-      background: var(--bg-primary);
-      z-index: 300;
-      display: none;
-      flex-direction: column;
-      padding: 0 20px;
-      overflow-y: auto;
-    }
-    .config-screen.show { display: flex; }
-    .config-title { font-size: 22px; font-weight: 700; margin: 20px 0 6px; }
-    .config-sub { color: var(--text-secondary); font-size: 13px; margin-bottom: 24px; line-height: 1.5; }
-    .config-label { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--text-secondary); margin-bottom: 8px; margin-top: 18px; }
-    .config-input {
-      width: 100%;
-      background: var(--bg-field);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 13px 14px;
-      color: var(--text-primary);
-      font-size: 13px;
-      font-family: 'SF Mono', monospace;
-      outline: none;
-    }
-    .config-input:focus { border-color: var(--accent); }
-    .config-save {
-      margin: 24px 0;
-      width: 100%;
-      padding: 16px;
-      background: var(--accent-entrata);
-      border: none;
-      border-radius: var(--radius-md);
-      color: #fff;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .config-note {
-      background: var(--bg-card);
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
-      font-size: 12px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-    .config-note strong { color: var(--text-primary); }
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--bg-card); padding: 12px 24px; border-radius: 12px; border: 1px solid var(--border); opacity: 0; transition: opacity .3s; z-index: 200; }
+    .toast.show { opacity: 1; }
+    .spinner { border: 2px solid rgba(255,255,255,.3); border-top: 2px solid #fff; border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; display: inline-block; margin-right: 8px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
-<div class="config-screen" id="configScreen">
+<div class="app" id="mainApp">
   <div class="safe-top"></div>
-  <div class="config-title">Configurazione</div>
-  <div class="config-sub">Inserisci l'URL del tuo Google Apps Script. Serve solo la prima volta.</div>
-
-  <div class="config-label">Google Apps Script URL</div>
-  <input class="config-input" id="cfgUrl" type="url"
-    placeholder="https://script.google.com/macros/s/..." autocomplete="off" spellcheck="false">
-
-  <div class="config-note">
-    <strong>Come ottenerlo:</strong><br>
-    1. Apri il tuo Google Sheet → Estensioni → Apps Script<br>
-    2. Incolla il codice da <code>GoogleAppsScript.gs</code><br>
-    3. Distribuisci → Nuova distribuzione → App web<br>
-    4. Copia l'URL e incollalo qui sopra
-  </div>
-
-  <button class="config-save" onclick="saveConfig()">Salva e inizia</button>
-  <div class="safe-bottom"></div>
-</div>
-
-<div class="app" id="mainApp" style="display:none">
-  <div class="safe-top"></div>
-
   <div class="header">
     <div class="header-date" id="headerDate"></div>
     <div class="header-title">Nuova transazione</div>
-    <button class="header-btn" onclick="openConfig()" title="Impostazioni">&#9881;</button>
+    <button class="header-btn" onclick="openConfig()">&#9881;</button>
   </div>
 
   <div class="tipo-wrap">
     <div class="tipo-toggle">
-      <button class="tipo-btn active-uscita" id="btnUscita"  onclick="setTipo('Uscita')">Uscita</button>
-      <button class="tipo-btn inactive"      id="btnEntrata" onclick="setTipo('Entrata')">Entrata</button>
-      <button class="tipo-btn inactive"      id="btnTrasf"   onclick="setTipo('Trasferimento')">Trasf.</button>
+      <button class="tipo-btn active-uscita" id="btnUscita" onclick="setTipo('Uscita')">Uscita</button>
+      <button class="tipo-btn inactive" id="btnEntrata" onclick="setTipo('Entrata')">Entrata</button>
+      <button class="tipo-btn inactive" id="btnTrasf" onclick="setTipo('Trasferimento')">Trasf.</button>
     </div>
   </div>
 
@@ -407,7 +187,6 @@
         <div class="field-label-sm">Data spesa</div>
         <div class="field-value-text" id="dataLabel"></div>
       </div>
-      <div class="field-arrow">›</div>
     </label>
     <input type="date" id="dataInput" class="date-input-hidden" onchange="onDateChange()">
   </div>
@@ -421,53 +200,43 @@
 
   <div class="fields">
     <div class="field-row" id="fieldCat" onclick="openSheet('cat')">
-      <div class="field-icon" style="color:#F59E0B;">📗</div>
+      <div class="field-icon">📗</div>
       <div class="field-content">
         <div class="field-label-sm">Categoria</div>
         <div class="field-value-text placeholder" id="catLabel">Seleziona categoria</div>
       </div>
-      <div class="field-arrow">&#8250;</div>
     </div>
-
     <div class="field-row" id="fieldSub" onclick="openSheet('sub')">
-      <div class="field-icon" style="color:#8B5CF6;">📘</div>
+      <div class="field-icon">📘</div>
       <div class="field-content">
         <div class="field-label-sm">Sottocategoria</div>
         <div class="field-value-text placeholder" id="subLabel">Seleziona sottocategoria</div>
       </div>
-      <div class="field-arrow">&#8250;</div>
     </div>
-
     <div class="field-row" id="fieldConto" onclick="openSheet('conto')">
       <div class="field-icon">💳</div>
       <div class="field-content">
-        <div class="field-label-sm" id="contoLabel-title">Conto / Carta</div>
+        <div class="field-label-sm" id="contoTitle">Conto / Carta</div>
         <div class="field-value-text placeholder" id="contoLabel">Seleziona conto</div>
       </div>
-      <div class="field-arrow">&#8250;</div>
     </div>
-
-    <div class="field-row" id="fieldContoDestinazione" onclick="openSheet('contoDest')" style="display:none">
+    <div class="field-row" id="fieldContoDest" onclick="openSheet('contoDest')" style="display:none">
       <div class="field-icon">🏦</div>
       <div class="field-content">
         <div class="field-label-sm">Conto Destinazione</div>
-        <div class="field-value-text placeholder" id="contoDestLabel">Seleziona conto di arrivo</div>
+        <div class="field-value-text placeholder" id="contoDestLabel">Seleziona destinazione</div>
       </div>
-      <div class="field-arrow">&#8250;</div>
     </div>
-
     <div class="field-row" id="fieldDest" onclick="openSheet('dest')">
       <div class="field-icon">🏛️</div>
       <div class="field-content">
         <div class="field-label-sm">Destinazione</div>
         <div class="field-value-text placeholder" id="destLabel">Seleziona destinazione</div>
       </div>
-      <div class="field-arrow">&#8250;</div>
     </div>
-
     <div class="note-field">
       <div class="field-icon">✏️</div>
-      <input class="note-input" id="noteInput" type="text" placeholder="Nota (opzionale)" maxlength="120">
+      <input class="note-input" id="noteInput" type="text" placeholder="Nota (opzionale)">
     </div>
   </div>
 
@@ -484,446 +253,176 @@
       <button class="key" onclick="key('9')">9</button>
       <button class="key" onclick="key(',')">,</button>
       <button class="key" onclick="key('0')">0</button>
-      <button class="key del" onclick="del()">&#9003;</button>
+      <button class="key" onclick="del()">&#9003;</button>
       <button class="key save" id="saveBtn" onclick="salva()">Salva transazione</button>
     </div>
   </div>
-
   <div class="safe-bottom"></div>
 </div>
 
+<div id="configScreen" style="display:none; position:fixed; inset:0; background:#000; z-index:300; padding:40px 20px;">
+    <h2 style="margin-bottom:20px">Configurazione</h2>
+    <input id="cfgUrl" type="text" placeholder="Apps Script URL" style="width:100%; padding:12px; margin-bottom:20px; background:#222; border:1px solid #444; color:#fff;">
+    <button onclick="saveConfig()" style="width:100%; padding:15px; background:var(--accent-entrata); border:none; color:#fff; font-weight:600;">Salva</button>
+</div>
+
 <div class="overlay" id="overlay" onclick="closeSheet()"></div>
-
-<div class="sheet" id="sheetCat">
-  <div class="sheet-handle"></div>
-  <div class="sheet-header">
-    <div class="sheet-title-text">Categoria</div>
-    <button class="sheet-close" onclick="closeSheet()">&#10005;</button>
-  </div>
-  <div class="sheet-list" id="listCat"></div>
-</div>
-
-<div class="sheet" id="sheetSub">
-  <div class="sheet-handle"></div>
-  <div class="sheet-header">
-    <div class="sheet-title-text">Sottocategoria</div>
-    <button class="sheet-close" onclick="closeSheet()">&#10005;</button>
-  </div>
-  <div class="sheet-list" id="listSub"></div>
-</div>
-
-<div class="sheet" id="sheetConto">
-  <div class="sheet-handle"></div>
-  <div class="sheet-header">
-    <div class="sheet-title-text">Conto / Carta</div>
-    <button class="sheet-close" onclick="closeSheet()">&#10005;</button>
-  </div>
-  <div class="sheet-list" id="listConto"></div>
-</div>
-
-<div class="sheet" id="sheetDest">
-  <div class="sheet-handle"></div>
-  <div class="sheet-header">
-    <div class="sheet-title-text">Destinazione</div>
-    <button class="sheet-close" onclick="closeSheet()">&#10005;</button>
-  </div>
-  <div class="sheet-list" id="listDest"></div>
-</div>
-
-<div class="sheet" id="sheetContoDest">
-  <div class="sheet-handle"></div>
-  <div class="sheet-header">
-    <div class="sheet-title-text">Conto Destinazione</div>
-    <button class="sheet-close" onclick="closeSheet()">&#10005;</button>
-  </div>
-  <div class="sheet-list" id="listContoDest"></div>
-</div>
+<div class="sheet" id="sheetCat"><div class="sheet-header">Categoria<button onclick="closeSheet()">✕</button></div><div class="sheet-list" id="listCat"></div></div>
+<div class="sheet" id="sheetSub"><div class="sheet-header">Sottocategoria<button onclick="closeSheet()">✕</button></div><div class="sheet-list" id="listSub"></div></div>
+<div class="sheet" id="sheetConto"><div class="sheet-header">Conto / Carta<button onclick="closeSheet()">✕</button></div><div class="sheet-list" id="listConto"></div></div>
+<div class="sheet" id="sheetContoDest"><div class="sheet-header">Conto Destinazione<button onclick="closeSheet()">✕</button></div><div class="sheet-list" id="listContoDest"></div></div>
+<div class="sheet" id="sheetDest"><div class="sheet-header">Destinazione<button onclick="closeSheet()">✕</button></div><div class="sheet-list" id="listDest"></div></div>
 
 <div class="toast" id="toast"></div>
 
 <script src="config.js"></script>
 <script>
-// ================================================================
-//  AUDIO ENGINE — Web Audio API
-// ================================================================
-const AudioEngine = {
-  ctx: null,
-  unlocked: false,
+let state = { tipo: 'Uscita', amount: '0', categoria: '', sottocategoria: '', conto: '', contoDestinazione: '', destinazione: '', dataSpesa: new Date().toISOString().split('T')[0] };
 
-  init() {
-    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const unlock = () => {
-      if (this.ctx.state === 'suspended') this.ctx.resume();
-      this.unlocked = true;
-    };
-    document.addEventListener('touchstart', unlock, { once: true });
-    document.addEventListener('click', unlock, { once: true });
-  },
-
-  play(freq, type, duration, vol = 0.08) {
-    if (!this.ctx) this.init();
-    if (this.ctx.state === 'suspended') this.ctx.resume();
-
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-
-    osc.frequency.value = freq;
-    osc.type = type;
-    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-
-    osc.start(this.ctx.currentTime);
-    osc.stop(this.ctx.currentTime + duration);
-  },
-
-  click()   { this.play(900, 'triangle', 0.06, 0.35); },
-  pop()     { this.play(700, 'sine',     0.10, 0.40); },
-  success() {
-    this.play(880,  'sine', 0.15, 0.35);
-    setTimeout(() => this.play(1100, 'sine', 0.18, 0.30), 80);
-    setTimeout(() => this.play(1320, 'sine', 0.22, 0.25), 160);
-  },
-  error() {
-    this.play(200, 'sawtooth', 0.30, 0.10);
-    setTimeout(() => this.play(150, 'sawtooth', 0.35, 0.08), 100);
-  },
-  delete() {
-    this.play(600, 'triangle', 0.08, 0.30);
-    setTimeout(() => this.play(400, 'triangle', 0.06, 0.25), 60);
-  }
+const AudioEngine = { 
+    init() { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+    play(f, t, d) { if(!this.ctx) return; const o=this.ctx.createOscillator(), g=this.ctx.createGain(); o.connect(g); g.connect(this.ctx.destination); o.frequency.value=f; o.type=t; g.gain.setValueAtTime(0.1, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime+d); o.start(); o.stop(this.ctx.currentTime+d); },
+    click() { this.play(800, 'sine', 0.1); }, success() { this.play(1000, 'sine', 0.2); }, error() { this.play(200, 'sawtooth', 0.3); }
 };
 
-// ================================================================
-//  HAPTIC ENGINE
-// ================================================================
-const Haptic = {
-  click()   { if (navigator.vibrate) navigator.vibrate(5); },
-  pop()     { if (navigator.vibrate) navigator.vibrate(8); },
-  success() { if (navigator.vibrate) navigator.vibrate([30, 40, 30]); },
-  error()   { if (navigator.vibrate) navigator.vibrate([60, 30, 60, 30, 100]); },
-  delete()  { if (navigator.vibrate) navigator.vibrate(12); }
-};
-
-// ================================================================
-//  STATE
-// ================================================================
-let state = {
-  tipo: 'Uscita',
-  amount: '0',
-  categoria: '',
-  sottocategoria: '',
-  conto: '',
-  contoDestinazione: '',
-  destinazione: '',
-  dataSpesa: '',
-};
-
-let activeSheet = null;
-
-function todayISO() {
-  const d = new Date();
-  return d.toISOString().split('T')[0];
-}
-function formatDateIT(iso) {
-  const [y, m, d] = iso.split('-');
-  const days = ['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
-  const months = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
-  const dt = new Date(iso);
-  return `${days[dt.getDay()]} ${parseInt(d)} ${months[parseInt(m)-1]}`;
-}
-function onDateChange() {
-  const val = document.getElementById('dataInput').value;
-  if (val) {
-    state.dataSpesa = val;
-    document.getElementById('dataLabel').textContent = formatDateIT(val);
-  }
-}
-
-// ================================================================
-//  INIT
-// ================================================================
 function init() {
   AudioEngine.init();
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  }
-
-  const now = new Date();
-  document.getElementById('headerDate').textContent =
-    now.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
-
-  state.dataSpesa = todayISO();
-  document.getElementById('dataInput').value = state.dataSpesa;
-  document.getElementById('dataLabel').textContent = formatDateIT(state.dataSpesa);
-
-  const url = localStorage.getItem('appsScriptUrl');
-  if (!url) {
-    document.getElementById('configScreen').classList.add('show');
-  } else {
-    document.getElementById('mainApp').style.display = 'flex';
-  }
+  document.getElementById('headerDate').textContent = new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('dataLabel').textContent = state.dataSpesa;
+  
+  if (!localStorage.getItem('appsScriptUrl')) openConfig();
 
   buildCatList();
   buildList('listConto', CONFIG.conti, 'conto');
+  buildList('listContoDest', CONFIG.conti, 'contoDestinazione'); // CARICA LA LISTA DESTINAZIONE
   buildList('listDest', CONFIG.destinazioni, 'destinazione');
-  // CARICAMENTO INIZIALE LISTA CONTI DESTINAZIONE
-  buildList('listContoDest', CONFIG.conti, 'contoDestinazione');
 }
 
-// ================================================================
-//  CONFIG
-// ================================================================
-function saveConfig() {
-  const url = document.getElementById('cfgUrl').value.trim();
-  if (!url.startsWith('https://script.google.com')) {
-    showToast('URL non valido', 'error'); 
-    AudioEngine.error(); Haptic.error();
-    return;
-  }
-  localStorage.setItem('appsScriptUrl', url);
-  document.getElementById('configScreen').classList.remove('show');
-  document.getElementById('mainApp').style.display = 'flex';
-  AudioEngine.success(); Haptic.success();
-}
-
-function openConfig() {
-  document.getElementById('cfgUrl').value = localStorage.getItem('appsScriptUrl') || '';
-  document.getElementById('configScreen').classList.add('show');
-}
-
-// ================================================================
-//  TIPO
-// ================================================================
 function setTipo(t) {
   state.tipo = t;
-  state.categoria = '';
-  state.sottocategoria = '';
-  state.contoDestinazione = '';
-
-  document.getElementById('btnUscita').className  = t === 'Uscita'         ? 'tipo-btn active-uscita'         : 'tipo-btn inactive';
-  document.getElementById('btnEntrata').className = t === 'Entrata'        ? 'tipo-btn active-entrata'        : 'tipo-btn inactive';
-  document.getElementById('btnTrasf').className   = t === 'Trasferimento'  ? 'tipo-btn active-trasferimento'  : 'tipo-btn inactive';
-
-  const accentMap = {
-    'Uscita':        'var(--accent-uscita)',
-    'Entrata':       'var(--accent-entrata)',
-    'Trasferimento': 'var(--accent-trasf)'
-  };
+  state.categoria = ''; state.sottocategoria = ''; state.contoDestinazione = '';
+  
+  const accentMap = { 'Uscita': '#E05A3A', 'Entrata': '#27AE60', 'Trasferimento': '#1F6FEB' };
   document.documentElement.style.setProperty('--accent', accentMap[t]);
+  
+  document.getElementById('btnUscita').className = t === 'Uscita' ? 'tipo-btn active-uscita' : 'tipo-btn inactive';
+  document.getElementById('btnEntrata').className = t === 'Entrata' ? 'tipo-btn active-entrata' : 'tipo-btn inactive';
+  document.getElementById('btnTrasf').className = t === 'Trasferimento' ? 'tipo-btn active-trasferimento' : 'tipo-btn inactive';
 
   const isTrasf = t === 'Trasferimento';
+  document.getElementById('fieldCat').style.display = isTrasf ? 'none' : 'flex';
+  document.getElementById('fieldSub').style.display = isTrasf ? 'none' : 'flex';
+  document.getElementById('fieldDest').style.display = isTrasf ? 'none' : 'flex';
+  document.getElementById('fieldContoDest').style.display = isTrasf ? 'flex' : 'none';
+  document.getElementById('contoTitle').textContent = isTrasf ? 'Conto Origine' : 'Conto / Carta';
 
-  document.getElementById('fieldCat').style.display         = isTrasf ? 'none' : 'flex';
-  document.getElementById('fieldSub').style.display         = isTrasf ? 'none' : 'flex';
-  document.getElementById('fieldDest').style.display        = isTrasf ? 'none' : 'flex';
-  document.getElementById('fieldContoDestinazione').style.display = isTrasf ? 'flex' : 'none';
-
-  document.getElementById('contoLabel-title').textContent = isTrasf ? 'Conto Origine' : 'Conto / Carta';
-
-  const cdl = document.getElementById('contoDestLabel');
-  cdl.textContent = 'Seleziona conto di arrivo';
-  cdl.classList.add('placeholder');
-  document.getElementById('fieldContoDestinazione').classList.remove('filled');
-
-  document.getElementById('catLabel').textContent = 'Seleziona categoria';
-  document.getElementById('catLabel').classList.add('placeholder');
-  document.getElementById('fieldCat').classList.remove('filled');
-  document.getElementById('subLabel').textContent = 'Seleziona sottocategoria';
-  document.getElementById('subLabel').classList.add('placeholder');
-  document.getElementById('fieldSub').classList.remove('filled');
-
-  if (!isTrasf) buildCatList();
-  updateAmountColor();
-  AudioEngine.pop(); Haptic.pop();
+  resetPlaceholders();
+  if(!isTrasf) buildCatList();
+  AudioEngine.click();
 }
 
-// ================================================================
-//  AMOUNT
-// ================================================================
 function key(k) {
   if (k === ',' && state.amount.includes(',')) return;
-  if (k === ',' && state.amount === '0') { state.amount = '0,'; renderAmount(); AudioEngine.click(); Haptic.click(); return; }
-  if (state.amount.replace(',','').replace(/\./g,'').length >= 8) return;
-  state.amount = state.amount === '0' && k !== ',' ? k : state.amount + k;
-  renderAmount();
-  AudioEngine.click(); Haptic.click();
+  state.amount = state.amount === '0' ? k : state.amount + k;
+  document.getElementById('amountVal').textContent = state.amount;
+  document.getElementById('amountDisplay').classList.add('has-value');
+  AudioEngine.click();
 }
 
 function del() {
   state.amount = state.amount.length > 1 ? state.amount.slice(0, -1) : '0';
-  renderAmount();
-  AudioEngine.delete(); Haptic.delete();
+  document.getElementById('amountVal').textContent = state.amount;
+  if(state.amount === '0') document.getElementById('amountDisplay').classList.remove('has-value');
 }
 
-function renderAmount() {
-  const parts = state.amount.split(',');
-  const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  const display = parts.length > 1 ? intPart + ',' + parts[1] : intPart;
-  document.getElementById('amountVal').textContent = display;
-  updateAmountColor();
-}
-
-function getAmountFloat() {
-  return parseFloat(state.amount.replace(',', '.')) || 0;
-}
-
-function updateAmountColor() {
-  const display = document.getElementById('amountDisplay');
-  display.classList.toggle('has-value', getAmountFloat() > 0);
-}
-
-// ================================================================
-//  BOTTOM SHEETS
-// ================================================================
-function buildCatList() {
-  const cats = Object.keys(CATEGORIE[state.tipo]);
-  const items = cats.map(c => {
-    const icons = {
-      Casa: '&#127968;', Cibo: '&#127860;', Trasporti: '&#128663;', Abbonamenti: '&#128241;',
-      Svago: '&#127909;', Salute: '&#10084;', Investimenti: '&#128200;', Tasse: '&#127963;',
-      Lavoro: '&#128188;', Altro: '&#8226;',
-      Stipendio: '&#128176;', Bonus: '&#127919;', 'Rimborso Lavoro': '&#128203;', 
-      'Affitto Percepito': '&#127968;', Dividendi: '&#128202;', Interessi: '&#127974;',
-      Vendite: '&#129309;', Regalo: '&#127873;'
-    };
-    return { label: c, icon: icons[c] || '&#8226;' };
-  });
-  buildList('listCat', items, 'categoria');
-}
-
-function buildSubList() {
-  if (!state.categoria) return;
-  const subs = CATEGORIE[state.tipo][state.categoria] || [];
-  const items = subs.map(s => ({ label: s, icon: '🔹' }));
-  buildList('listSub', items, 'sottocategoria');
-}
-
-function buildList(containerId, items, stateKey) {
-  const el = document.getElementById(containerId);
-  el.innerHTML = items.map(item => `
-    <div class="sheet-item ${state[stateKey] === item.label ? 'selected' : ''}"
-         onclick="pickItem('${stateKey}','${item.label}')">
-      <div class="sheet-item-icon">${item.icon}</div>
-      <div class="sheet-item-text">${item.label}</div>
-      <div class="sheet-item-check">&#10003;</div>
+function buildList(id, items, key) {
+  const container = document.getElementById(id);
+  container.innerHTML = items.map(item => `
+    <div class="sheet-item ${state[key] === item.label ? 'selected' : ''}" onclick="pickItem('${key}', '${item.label}')">
+      <div class="sheet-item-text">${item.icon} ${item.label}</div>
+      <div class="sheet-item-check">✓</div>
     </div>
   `).join('');
 }
 
-function openSheet(which) {
-  if (which === 'sub' && !state.categoria) {
-    showToast('Seleziona prima una categoria', 'error');
-    AudioEngine.error(); Haptic.error();
-    return;
-  }
-  if (which === 'sub') buildSubList();
-
-  activeSheet = which;
-  const sheetMap = { cat: 'sheetCat', sub: 'sheetSub', conto: 'sheetConto', dest: 'sheetDest', contoDest: 'sheetContoDest' };
-  document.getElementById(sheetMap[which]).classList.add('open');
+function openSheet(s) {
+  const map = { cat: 'sheetCat', sub: 'sheetSub', conto: 'sheetConto', contoDest: 'sheetContoDest', dest: 'sheetDest' };
+  document.getElementById(map[s]).classList.add('open');
   document.getElementById('overlay').classList.add('show');
-  AudioEngine.pop(); Haptic.pop();
 }
 
 function closeSheet() {
-  ['sheetCat','sheetSub','sheetConto','sheetDest','sheetContoDest'].forEach(id =>
-    document.getElementById(id).classList.remove('open'));
+  document.querySelectorAll('.sheet').forEach(s => s.classList.remove('open'));
   document.getElementById('overlay').classList.remove('show');
-  activeSheet = null;
 }
 
-function pickItem(stateKey, value) {
-  state[stateKey] = value;
-
-  const labelMap = {
-    categoria:          { labelId: 'catLabel',      fieldId: 'fieldCat' },
-    sottocategoria:     { labelId: 'subLabel',       fieldId: 'fieldSub' },
-    conto:              { labelId: 'contoLabel',     fieldId: 'fieldConto' },
-    contoDestinazione:  { labelId: 'contoDestLabel', fieldId: 'fieldContoDestinazione' },
-    destinazione:       { labelId: 'destLabel',      fieldId: 'fieldDest' },
-  };
-  const m = labelMap[stateKey];
-  const label = document.getElementById(m.labelId);
-  label.textContent = value;
+function pickItem(key, val) {
+  state[key] = val;
+  const labelMap = { categoria: 'catLabel', sottocategoria: 'subLabel', conto: 'contoLabel', contoDestinazione: 'contoDestLabel', destinazione: 'destLabel' };
+  const fieldMap = { categoria: 'fieldCat', sottocategoria: 'fieldSub', conto: 'fieldConto', contoDestinazione: 'fieldContoDest', destinazione: 'fieldDest' };
+  
+  const label = document.getElementById(labelMap[key]);
+  label.textContent = val;
   label.classList.remove('placeholder');
-  document.getElementById(m.fieldId).classList.add('filled');
+  document.getElementById(fieldMap[key]).classList.add('filled');
 
-  if (stateKey === 'conto')             buildList('listConto',     CONFIG.conti,        'conto');
-  if (stateKey === 'contoDestinazione') buildList('listContoDest', CONFIG.conti,        'contoDestinazione');
-  if (stateKey === 'destinazione')      buildList('listDest',      CONFIG.destinazioni,  'destinazione');
-
-  if (stateKey === 'categoria') {
-    state.sottocategoria = '';
-    document.getElementById('subLabel').textContent = 'Seleziona sottocategoria';
-    document.getElementById('subLabel').classList.add('placeholder');
-    document.getElementById('fieldSub').classList.remove('filled');
-    buildCatList();
+  if(key === 'categoria') { buildSubList(); state.sottocategoria = ''; document.getElementById('subLabel').textContent = 'Seleziona sottocategoria'; document.getElementById('subLabel').classList.add('placeholder'); }
+  
+  // Aggiorna le liste per mostrare il check corretto
+  if(key === 'conto' || key === 'contoDestinazione') {
+      buildList('listConto', CONFIG.conti, 'conto');
+      buildList('listContoDest', CONFIG.conti, 'contoDestinazione');
   }
 
-  AudioEngine.pop(); Haptic.pop();
-  setTimeout(closeSheet, 180);
+  setTimeout(closeSheet, 200);
 }
 
-// ================================================================
-//  SALVA
-// ================================================================
+function buildCatList() {
+    const cats = Object.keys(CATEGORIE[state.tipo] || {});
+    buildList('listCat', cats.map(c => ({label: c, icon: '📗'})), 'categoria');
+}
+
+function buildSubList() {
+    const subs = CATEGORIE[state.tipo][state.categoria] || [];
+    buildList('listSub', subs.map(s => ({label: s, icon: '🔹'})), 'sottocategoria');
+}
+
 async function salva() {
-  const amount = getAmountFloat();
-  if (!amount || amount === 0) { 
-    showToast('Inserisci un importo', 'error'); 
-    AudioEngine.error(); Haptic.error();
-    return; 
-  }
-
-  // Controlli validazione
-  if (state.tipo !== 'Trasferimento' && !state.categoria)
-    { showToast('Seleziona una categoria', 'error'); AudioEngine.error(); Haptic.error(); return; }
-  if (!state.conto)
-    { showToast('Seleziona il conto', 'error'); AudioEngine.error(); Haptic.error(); return; }
-  if (state.tipo === 'Trasferimento' && !state.contoDestinazione)
-    { showToast('Seleziona il conto di arrivo', 'error'); AudioEngine.error(); Haptic.error(); return; }
-
+  const amount = parseFloat(state.amount.replace(',', '.'));
+  if (amount === 0) return showToast('Inserisci importo');
+  
   const btn = document.getElementById('saveBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Salvataggio...';
 
-  const importoConSegno = state.tipo === 'Uscita' ? -amount : amount;
-
-  // Questo oggetto deve corrispondere a ciò che lo script si aspetta
   const payload = {
-    timestamp:          new Date().toISOString(),
-    dataSpesa:          state.dataSpesa,
-    importo:            importoConSegno,
-    tipo:               state.tipo,
-    categoria:          state.tipo === 'Trasferimento' ? 'Trasferimento' : state.categoria,
-    sottocategoria:     state.tipo === 'Trasferimento' ? '-' : state.sottocategoria,
-    conto:              state.conto,
-    // ASSICURATI CHE IL NOME 'contoDestinazione' SIA UGUALE NEL FILE .GS
-    contoDestinazione:  state.tipo === 'Trasferimento' ? state.contoDestinazione : '', 
-    destinazione:       state.tipo === 'Trasferimento' ? '-' : state.destinazione,
-    note:               document.getElementById('noteInput').value.trim(),
-    fonte:              'iPhone'
+    timestamp: new Date().toISOString(),
+    dataSpesa: state.dataSpesa,
+    importo: state.tipo === 'Uscita' ? -amount : amount,
+    destinazione: state.tipo === 'Trasferimento' ? '-' : state.destinazione,
+    categoria: state.tipo === 'Trasferimento' ? 'Trasferimento' : state.categoria,
+    sottocategoria: state.tipo === 'Trasferimento' ? '-' : state.sottocategoria,
+    conto: state.conto,
+    note: document.getElementById('noteInput').value,
+    fonte: 'iPhone',
+    tipo: state.tipo,
+    contoDestinazione: state.tipo === 'Trasferimento' ? state.contoDestinazione : '' // CAMPO K
   };
 
   try {
-    const url = localStorage.getItem('appsScriptUrl');
-    await fetch(url, {
+    await fetch(localStorage.getItem('appsScriptUrl'), {
       method: 'POST',
-      mode: 'no-cors', // Importante: mode no-cors non permette di leggere la risposta ma invia i dati
+      mode: 'no-cors',
+      cache: 'no-cache',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(payload)
     });
-
-    AudioEngine.success(); Haptic.success();
-    showToast('&#10003; Transazione salvata', 'success');
+    showToast('✓ Salvato!');
+    AudioEngine.success();
     resetForm();
-  } catch (err) {
-    console.error(err);
-    AudioEngine.error(); Haptic.error();
-    showToast('Errore di connessione', 'error');
+  } catch (e) {
+    showToast('Errore connessione');
+    AudioEngine.error();
   } finally {
     btn.disabled = false;
     btn.textContent = 'Salva transazione';
@@ -931,46 +430,33 @@ async function salva() {
 }
 
 function resetForm() {
-  state.amount = '0';
-  state.categoria = '';
-  state.sottocategoria = '';
-  state.conto = '';
-  state.destinazione = '';
-  state.dataSpesa = todayISO();
-
-  document.getElementById('dataInput').value = state.dataSpesa;
-  document.getElementById('dataLabel').textContent = formatDateIT(state.dataSpesa);
-  document.getElementById('amountVal').textContent = '0';
-  document.getElementById('amountDisplay').classList.remove('has-value');
-  document.getElementById('noteInput').value = '';
-
-  ['catLabel','subLabel','contoLabel','destLabel','contoDestLabel'].forEach(id => {
-    const el = document.getElementById(id);
-    el.classList.add('placeholder');
-  });
-  document.getElementById('catLabel').textContent = 'Seleziona categoria';
-  document.getElementById('subLabel').textContent = 'Seleziona sottocategoria';
-  document.getElementById('contoLabel').textContent = 'Seleziona conto';
-  document.getElementById('destLabel').textContent = 'Seleziona destinazione';
-  document.getElementById('contoDestLabel').textContent = 'Seleziona conto di arrivo';
-
-  state.contoDestinazione = '';
-  ['fieldCat','fieldSub','fieldConto','fieldDest','fieldContoDestinazione'].forEach(id =>
-    document.getElementById(id).classList.remove('filled'));
-
-  buildCatList();
-  buildList('listConto', CONFIG.conti, 'conto');
-  buildList('listContoDest', CONFIG.conti, 'contoDestinazione');
-  buildList('listDest', CONFIG.destinazioni, 'destinazione');
+    state.amount = '0'; state.categoria = ''; state.sottocategoria = ''; state.conto = ''; state.contoDestinazione = ''; state.destinazione = '';
+    document.getElementById('amountVal').textContent = '0';
+    document.getElementById('amountDisplay').classList.remove('has-value');
+    document.getElementById('noteInput').value = '';
+    resetPlaceholders();
 }
 
-function showToast(msg, type = '') {
+function resetPlaceholders() {
+    const labels = ['catLabel', 'subLabel', 'contoLabel', 'contoDestLabel', 'destLabel'];
+    const texts = ['Seleziona categoria', 'Seleziona sottocategoria', 'Seleziona conto', 'Seleziona destinazione', 'Seleziona destinazione'];
+    labels.forEach((id, i) => { 
+        const el = document.getElementById(id);
+        if(el) { el.textContent = texts[i]; el.classList.add('placeholder'); document.getElementById(id.replace('Label','')).parentElement.classList.remove('filled'); }
+    });
+    // Correzione ID per fieldContoDest
+    document.getElementById('fieldContoDest').classList.remove('filled');
+    document.getElementById('fieldConto').classList.remove('filled');
+}
+
+function showToast(m) {
   const t = document.getElementById('toast');
-  t.innerHTML = msg;
-  t.className = 'toast show ' + type;
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 2800);
+  t.textContent = m; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
+
+function openConfig() { document.getElementById('configScreen').style.display='block'; document.getElementById('cfgUrl').value = localStorage.getItem('appsScriptUrl') || ''; }
+function saveConfig() { localStorage.setItem('appsScriptUrl', document.getElementById('cfgUrl').value); document.getElementById('configScreen').style.display='none'; }
 
 init();
 </script>
