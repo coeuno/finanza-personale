@@ -913,16 +913,19 @@ async function salva() {
     AudioEngine.error(); Haptic.error();
     return; 
   }
-  if (state.tipo !== 'Trasferimento' && !state.categoria)
-    { showToast('Seleziona una categoria', 'error'); AudioEngine.error(); Haptic.error(); return; }
-  if (state.tipo !== 'Trasferimento' && !state.sottocategoria)
-    { showToast('Seleziona una sottocategoria', 'error'); AudioEngine.error(); Haptic.error(); return; }
-  if (!state.conto)
-    { showToast('Seleziona il conto', 'error'); AudioEngine.error(); Haptic.error(); return; }
-  if (state.tipo === 'Trasferimento' && !state.contoDestinazione)
-    { showToast('Seleziona il conto di arrivo', 'error'); AudioEngine.error(); Haptic.error(); return; }
-  if (state.tipo !== 'Trasferimento' && !state.destinazione)
-    { showToast('Seleziona la destinazione', 'error'); AudioEngine.error(); Haptic.error(); return; }
+  
+  // Validazioni condizionali
+  if (state.tipo !== 'Trasferimento') {
+    if (!state.categoria) { showToast('Seleziona una categoria', 'error'); AudioEngine.error(); Haptic.error(); return; }
+    if (!state.sottocategoria) { showToast('Seleziona una sottocategoria', 'error'); AudioEngine.error(); Haptic.error(); return; }
+    if (!state.destinazione) { showToast('Seleziona la destinazione', 'error'); AudioEngine.error(); Haptic.error(); return; }
+  } else {
+    // Validazione specifica per Trasferimento
+    if (!state.contoDestinazione) { showToast('Seleziona il conto di arrivo', 'error'); AudioEngine.error(); Haptic.error(); return; }
+    if (state.conto === state.contoDestinazione) { showToast('I conti devono essere diversi', 'error'); AudioEngine.error(); Haptic.error(); return; }
+  }
+
+  if (!state.conto) { showToast('Seleziona il conto', 'error'); AudioEngine.error(); Haptic.error(); return; }
 
   const btn = document.getElementById('saveBtn');
   btn.disabled = true;
@@ -936,19 +939,18 @@ async function salva() {
     dataSpesa:          state.dataSpesa,
     importo:            importoConSegno,
     tipo:               state.tipo,
-    categoria:          state.tipo === 'Trasferimento' ? '' : state.categoria,
-    sottocategoria:     state.tipo === 'Trasferimento' ? '' : state.sottocategoria,
+    // Se è un trasferimento, scriviamo "Trasferimento" come categoria per il database
+    categoria:          state.tipo === 'Trasferimento' ? 'Trasferimento' : state.categoria,
+    sottocategoria:     state.tipo === 'Trasferimento' ? '-' : state.sottocategoria,
     conto:              state.conto,
     contoDestinazione:  state.tipo === 'Trasferimento' ? state.contoDestinazione : '',
-    destinazione:       state.tipo === 'Trasferimento' ? '' : state.destinazione,
+    destinazione:       state.tipo === 'Trasferimento' ? '-' : state.destinazione,
     note:               document.getElementById('noteInput').value.trim(),
     fonte:              'iPhone'
   };
 
   try {
     const url = localStorage.getItem('appsScriptUrl');
-    // mode: 'no-cors' è obbligatorio con Google Apps Script.
-    // La risposta sarà opaca (non leggibile) — assumiamo successo se non c'è errore di rete.
     await fetch(url, {
       method: 'POST',
       mode: 'no-cors',
@@ -999,6 +1001,7 @@ function resetForm() {
   cdl.textContent = 'Seleziona conto di arrivo';
   cdl.classList.add('placeholder');
 
+  // Ricarica le liste
   buildCatList();
   buildList('listConto', CONFIG.conti, 'conto');
   buildList('listContoDest', CONFIG.conti, 'contoDestinazione');
@@ -1016,7 +1019,11 @@ function showToast(msg, type = '') {
   t._timer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
+// Assicuriamoci che init chiami buildList per il conto destinazione
+const originalInit = init;
+init = function() {
+  originalInit();
+  buildList('listContoDest', CONFIG.conti, 'contoDestinazione');
+};
+
 init();
-</script>
-</body>
-</html>
