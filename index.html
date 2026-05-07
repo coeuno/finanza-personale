@@ -389,44 +389,73 @@ function buildSubList() {
 
 async function salva() {
   const amount = parseFloat(state.amount.replace(',', '.'));
-  if (amount === 0) return showToast('Inserisci importo');
+  if (amount === 0 || isNaN(amount)) return showToast('Inserisci un importo');
   
   const btn = document.getElementById('saveBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Salvataggio...';
 
+  // Prepariamo il pacchetto dati
   const payload = {
-    timestamp: new Date().toISOString(),
-    dataSpesa: state.dataSpesa,
-    importo: state.tipo === 'Uscita' ? -amount : amount,
-    destinazione: state.tipo === 'Trasferimento' ? '-' : state.destinazione,
-    categoria: state.tipo === 'Trasferimento' ? 'Trasferimento' : state.categoria,
-    sottocategoria: state.tipo === 'Trasferimento' ? '-' : state.sottocategoria,
-    conto: state.conto,
-    note: document.getElementById('noteInput').value,
-    fonte: 'iPhone',
-    tipo: state.tipo,
-    contoDestinazione: state.tipo === 'Trasferimento' ? state.contoDestinazione : '' // CAMPO K
+    dataSpesa:          state.dataSpesa,
+    importo:            state.tipo === 'Uscita' ? -amount : amount,
+    tipo:               state.tipo,
+    categoria:          state.tipo === 'Trasferimento' ? 'Trasferimento' : state.categoria,
+    sottocategoria:     state.tipo === 'Trasferimento' ? '-' : state.sottocategoria,
+    conto:              state.conto,
+    contoDestinazione:  state.tipo === 'Trasferimento' ? state.contoDestinazione : '', // ECCO IL DATO PER LA COLONNA K
+    destinazione:       state.tipo === 'Trasferimento' ? '-' : state.destinazione,
+    note:               document.getElementById('noteInput').value.trim(),
+    fonte:              'iPhone'
   };
 
   try {
-    await fetch(localStorage.getItem('appsScriptUrl'), {
+    const url = localStorage.getItem('appsScriptUrl');
+    
+    // USIAMO 'text/plain' per evitare il blocco CORS che causa l'"Errore di connessione"
+    await fetch(url, {
       method: 'POST',
-      mode: 'no-cors',
+      mode: 'no-cors', // Fondamentale per Google Script
       cache: 'no-cache',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' }, 
       body: JSON.stringify(payload)
     });
-    showToast('✓ Salvato!');
+
+    // Dato che no-cors non permette di leggere la risposta, 
+    // se non crasha qui consideriamo che sia andata bene
+    showToast('✓ Salvato correttamente', 'success');
     AudioEngine.success();
+    Haptic.success();
     resetForm();
-  } catch (e) {
-    showToast('Errore connessione');
+  } catch (err) {
+    console.error(err);
+    showToast('Errore di invio', 'error');
     AudioEngine.error();
   } finally {
     btn.disabled = false;
     btn.textContent = 'Salva transazione';
   }
+}
+
+// Assicurati che pickItem gestisca correttamente il campo
+function pickItem(key, val) {
+  state[key] = val;
+  const labelMap = { 
+    categoria: 'catLabel', 
+    sottocategoria: 'subLabel', 
+    conto: 'contoLabel', 
+    contoDestinazione: 'contoDestLabel', 
+    destinazione: 'destLabel' 
+  };
+  
+  const label = document.getElementById(labelMap[key]);
+  if(label) {
+    label.textContent = val;
+    label.classList.remove('placeholder');
+  }
+  
+  // Chiude il menu dopo la selezione
+  setTimeout(closeSheet, 200);
 }
 
 function resetForm() {
