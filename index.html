@@ -821,13 +821,9 @@ function buildSubList() {
   buildList('listSub', items, 'sottocategoria');
 }
 
-// ================================================================
-//  buildList ROBUSTA — usa createElement invece di innerHTML
-//  Questo fixa il bug del conto destinazione su iOS
-// ================================================================
 function buildList(containerId, items, stateKey) {
   const el = document.getElementById(containerId);
-  el.innerHTML = ''; // Pulisci completamente
+  el.innerHTML = '';
 
   items.forEach(item => {
     const div = document.createElement('div');
@@ -839,7 +835,7 @@ function buildList(containerId, items, stateKey) {
 
     const textDiv = document.createElement('div');
     textDiv.className = 'sheet-item-text';
-    textDiv.textContent = item.label; // textContent = escaping automatico, niente problemi con apostrofi
+    textDiv.textContent = item.label;
 
     const checkDiv = document.createElement('div');
     checkDiv.className = 'sheet-item-check';
@@ -849,7 +845,6 @@ function buildList(containerId, items, stateKey) {
     div.appendChild(textDiv);
     div.appendChild(checkDiv);
 
-    // Event listener invece di onclick inline — molto più robusto su iPhone
     div.addEventListener('click', function() {
       pickItem(stateKey, item.label);
     });
@@ -896,7 +891,6 @@ function pickItem(stateKey, value) {
   label.classList.remove('placeholder');
   document.getElementById(m.fieldId).classList.add('filled');
 
-  // Rebuild lista per aggiornare checkmark
   if (stateKey === 'conto')             buildList('listConto',     CONFIG.conti,        'conto');
   if (stateKey === 'contoDestinazione') buildList('listContoDest', CONFIG.conti,        'contoDestinazione');
   if (stateKey === 'destinazione')      buildList('listDest',      CONFIG.destinazioni,  'destinazione');
@@ -914,7 +908,7 @@ function pickItem(stateKey, value) {
 }
 
 // ================================================================
-//  SALVA — con logging debug visivo
+//  SALVA — pulito, senza log debug
 // ================================================================
 async function salva() {
   const amount = getAmountFloat();
@@ -940,25 +934,19 @@ async function salva() {
 
   const importoConSegno = state.tipo === 'Uscita' ? -amount : amount;
 
- const payload = {
-  timestamp:          new Date().toISOString(),
-  dataSpesa:          state.dataSpesa,
-  importo:            importoConSegno,
-  tipo:               state.tipo,
-  categoria:          state.tipo === 'Trasferimento' ? '' : state.categoria,
-  sottocategoria:     state.tipo === 'Trasferimento' ? '' : state.sottocategoria,
-  conto:              state.conto || '',
-  contoDestinazione:  state.tipo === 'Trasferimento' ? (state.contoDestinazione || '') : '',
-  destinazione:       state.tipo === 'Trasferimento' ? '' : state.destinazione,
-  note:               document.getElementById('noteInput').value.trim(),
-  fonte:              'iPhone'
-};
-
-  // ========== DEBUG VISIVO ==========
-  // Mostra un toast con le info chiave per verificare che contoDestinazione sia popolato
-  const debugMsg = `DEBUG | Tipo: ${payload.tipo} | Origine: ${payload.conto} | Dest: "${payload.contoDestinazione}" | €${amount}`;
-  showToast(debugMsg, 'success');
-  // ===================================
+  const payload = {
+    timestamp:          new Date().toISOString(),
+    dataSpesa:          state.dataSpesa,
+    importo:            importoConSegno,
+    tipo:               state.tipo,
+    categoria:          state.tipo === 'Trasferimento' ? '' : state.categoria,
+    sottocategoria:     state.tipo === 'Trasferimento' ? '' : state.sottocategoria,
+    conto:              state.conto || '',
+    contoDestinazione:  state.tipo === 'Trasferimento' ? (state.contoDestinazione || '') : '',
+    destinazione:       state.tipo === 'Trasferimento' ? '' : state.destinazione,
+    note:               document.getElementById('noteInput').value.trim(),
+    fonte:              'iPhone'
+  };
 
   try {
     const url = localStorage.getItem('appsScriptUrl');
@@ -1025,7 +1013,7 @@ function showToast(msg, type = '') {
   t.innerHTML = msg;
   t.className = 'toast show ' + type;
   clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 3500); // Aumentato a 3.5s per leggere il debug
+  t._timer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
 init();
