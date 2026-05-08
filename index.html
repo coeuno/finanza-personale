@@ -940,19 +940,19 @@ async function salva() {
 
   const importoConSegno = state.tipo === 'Uscita' ? -amount : amount;
 
-  const payload = {
-    timestamp:          new Date().toISOString(),
-    dataSpesa:          state.dataSpesa,
-    importo:            importoConSegno,
-    tipo:               state.tipo,
-    categoria:          state.tipo === 'Trasferimento' ? '' : state.categoria,
-    sottocategoria:     state.tipo === 'Trasferimento' ? '' : state.sottocategoria,
-    conto:              state.conto,
-    contoDestinazione:  state.tipo === 'Trasferimento' ? state.contoDestinazione : '',
-    destinazione:       state.tipo === 'Trasferimento' ? '' : state.destinazione,
-    note:               document.getElementById('noteInput').value.trim(),
-    fonte:              'iPhone'
-  };
+ const payload = {
+  timestamp:          new Date().toISOString(),
+  dataSpesa:          state.dataSpesa,
+  importo:            importoConSegno,
+  tipo:               state.tipo,
+  categoria:          state.tipo === 'Trasferimento' ? '' : state.categoria,
+  sottocategoria:     state.tipo === 'Trasferimento' ? '' : state.sottocategoria,
+  conto:              state.conto || '',
+  contoDestinazione:  state.tipo === 'Trasferimento' ? (state.contoDestinazione || '') : '',
+  destinazione:       state.tipo === 'Trasferimento' ? '' : state.destinazione,
+  note:               document.getElementById('noteInput').value.trim(),
+  fonte:              'iPhone'
+};
 
   // ========== DEBUG VISIVO ==========
   // Mostra un toast con le info chiave per verificare che contoDestinazione sia popolato
