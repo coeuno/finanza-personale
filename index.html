@@ -928,7 +928,6 @@ async function salva() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Salvataggio...';
 
-  // Importo: negativo per Uscite, positivo per Entrate e Trasferimenti
   const importoConSegno = state.tipo === 'Uscita' ? -amount : amount;
 
   const payload = {
@@ -945,15 +944,22 @@ async function salva() {
     fonte:              'iPhone'
   };
 
+  // ========== DEBUG LOGGING ==========
+  console.log('=== PWA DEBUG PAYLOAD ===');
+  console.log(JSON.stringify(payload, null, 2));
+  console.log('state.contoDestinazione:', state.contoDestinazione);
+  console.log('state.tipo:', state.tipo);
+  
+  // Mostra un toast con il payload per debug visivo (rimuovi dopo il test)
+  const debugInfo = `DEBUG - Tipo: ${payload.tipo} | ContoDest: "${payload.contoDestinazione}" | Importo: ${payload.importo}`;
+  showToast(debugInfo, 'success');
+  // ===================================
+
   try {
     const url = localStorage.getItem('appsScriptUrl');
-    // mode: 'no-cors' è obbligatorio con Google Apps Script.
-    // La risposta sarà opaca (non leggibile) — assumiamo successo se non c'è errore di rete.
     await fetch(url, {
       method: 'POST',
       mode: 'no-cors',
-      // Content-Type: application/json NON è permesso con no-cors su iOS Safari.
-      // Apps Script legge il body grezzo via e.postData.contents quindi non serve.
       body: JSON.stringify(payload),
     });
 
@@ -961,6 +967,7 @@ async function salva() {
     showToast('&#10003; Transazione salvata', 'success');
     resetForm();
   } catch (err) {
+    console.error('FETCH ERROR:', err);
     AudioEngine.error(); Haptic.error();
     showToast('Errore di connessione', 'error');
   } finally {
@@ -968,7 +975,6 @@ async function salva() {
     btn.textContent = 'Salva transazione';
   }
 }
-
 function resetForm() {
   state.amount = '0';
   state.categoria = '';
