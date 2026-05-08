@@ -555,11 +555,6 @@
 <script src="config.js"></script>
 <script>
 // ================================================================
-//  CONFIGURAZIONE CATEGORIE E SOTTOCATEGORIE
-// ================================================================
-// CATEGORIE e CONFIG sono definiti in config.js (caricato prima di questo script)
-
-// ================================================================
 //  AUDIO ENGINE — Web Audio API
 // ================================================================
 const AudioEngine = {
@@ -568,7 +563,6 @@ const AudioEngine = {
 
   init() {
     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-    // Unlock su primo touch (iOS richiede interazione utente)
     const unlock = () => {
       if (this.ctx.state === 'suspended') this.ctx.resume();
       this.unlocked = true;
@@ -607,7 +601,6 @@ const AudioEngine = {
     setTimeout(() => this.play(150, 'sawtooth', 0.35, 0.08), 100);
   },
   delete() {
-    // Suono discendente — chiaramente diverso dai tasti numerici
     this.play(600, 'triangle', 0.08, 0.30);
     setTimeout(() => this.play(400, 'triangle', 0.06, 0.25), 60);
   }
@@ -635,7 +628,7 @@ let state = {
   conto: '',
   contoDestinazione: '',
   destinazione: '',
-  dataSpesa: '', // formato YYYY-MM-DD
+  dataSpesa: '',
 };
 
 let activeSheet = null;
@@ -643,7 +636,7 @@ let activeSheet = null;
 // Helpers data
 function todayISO() {
   const d = new Date();
-  return d.toISOString().split('T')[0]; // YYYY-MM-DD
+  return d.toISOString().split('T')[0];
 }
 function formatDateIT(iso) {
   const [y, m, d] = iso.split('-');
@@ -674,7 +667,6 @@ function init() {
   document.getElementById('headerDate').textContent =
     now.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
 
-  // Precompila data spesa con oggi
   state.dataSpesa = todayISO();
   document.getElementById('dataInput').value = state.dataSpesa;
   document.getElementById('dataLabel').textContent = formatDateIT(state.dataSpesa);
@@ -691,7 +683,6 @@ function init() {
   buildList('listContoDest', CONFIG.conti,        'contoDestinazione');
   buildList('listDest',      CONFIG.destinazioni,  'destinazione');
 
-  // Nascondi conto destinazione all'avvio (visibile solo per Trasferimento)
   document.getElementById('fieldContoDestinazione').style.display = 'none';
 }
 
@@ -738,29 +729,24 @@ function setTipo(t) {
 
   const isTrasf = t === 'Trasferimento';
 
-  // Mostra/nascondi campi in base al tipo
   document.getElementById('fieldCat').style.display         = isTrasf ? 'none' : 'flex';
   document.getElementById('fieldSub').style.display         = isTrasf ? 'none' : 'flex';
   document.getElementById('fieldDest').style.display        = isTrasf ? 'none' : 'flex';
   document.getElementById('fieldContoDestinazione').style.display = isTrasf ? 'flex' : 'none';
 
-  // Se trasferimento sblocca subito conto destinazione
   if (isTrasf) {
     document.getElementById('fieldContoDestinazione').classList.remove('locked');
   } else {
     document.getElementById('fieldContoDestinazione').classList.add('locked');
   }
 
-  // Label conto origine
   document.getElementById('contoLabel-title').textContent = isTrasf ? 'Conto Origine' : 'Conto / Carta';
 
-  // Reset conto destinazione
   const cdl = document.getElementById('contoDestLabel');
   cdl.textContent = 'Seleziona conto di arrivo';
   cdl.classList.add('placeholder');
   document.getElementById('fieldContoDestinazione').classList.remove('filled');
 
-  // Reset categoria
   document.getElementById('catLabel').textContent = 'Seleziona categoria';
   document.getElementById('catLabel').classList.add('placeholder');
   document.getElementById('fieldCat').classList.remove('filled');
@@ -809,7 +795,7 @@ function updateAmountColor() {
 }
 
 // ================================================================
-//  BOTTOM SHEETS
+//  BOTTOM SHEETS — VERSIONE ROBUSTA CON createElement
 // ================================================================
 function buildCatList() {
   const tipo = state.tipo === 'Trasferimento' ? 'Uscita' : state.tipo;
@@ -835,16 +821,41 @@ function buildSubList() {
   buildList('listSub', items, 'sottocategoria');
 }
 
+// ================================================================
+//  buildList ROBUSTA — usa createElement invece di innerHTML
+//  Questo fixa il bug del conto destinazione su iOS
+// ================================================================
 function buildList(containerId, items, stateKey) {
   const el = document.getElementById(containerId);
-  el.innerHTML = items.map(item => `
-    <div class="sheet-item ${state[stateKey] === item.label ? 'selected' : ''}"
-         onclick="pickItem('${stateKey}','${item.label}')">
-      <div class="sheet-item-icon">${item.icon}</div>
-      <div class="sheet-item-text">${item.label}</div>
-      <div class="sheet-item-check">&#10003;</div>
-    </div>
-  `).join('');
+  el.innerHTML = ''; // Pulisci completamente
+
+  items.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'sheet-item ' + (state[stateKey] === item.label ? 'selected' : '');
+
+    const iconDiv = document.createElement('div');
+    iconDiv.className = 'sheet-item-icon';
+    iconDiv.innerHTML = item.icon;
+
+    const textDiv = document.createElement('div');
+    textDiv.className = 'sheet-item-text';
+    textDiv.textContent = item.label; // textContent = escaping automatico, niente problemi con apostrofi
+
+    const checkDiv = document.createElement('div');
+    checkDiv.className = 'sheet-item-check';
+    checkDiv.innerHTML = '&#10003;';
+
+    div.appendChild(iconDiv);
+    div.appendChild(textDiv);
+    div.appendChild(checkDiv);
+
+    // Event listener invece di onclick inline — molto più robusto su iPhone
+    div.addEventListener('click', function() {
+      pickItem(stateKey, item.label);
+    });
+
+    el.appendChild(div);
+  });
 }
 
 function openSheet(which) {
@@ -890,7 +901,6 @@ function pickItem(stateKey, value) {
   if (stateKey === 'contoDestinazione') buildList('listContoDest', CONFIG.conti,        'contoDestinazione');
   if (stateKey === 'destinazione')      buildList('listDest',      CONFIG.destinazioni,  'destinazione');
 
-  // Se cambio categoria, reset sottocategoria e ricostruisci lista cat
   if (stateKey === 'categoria') {
     state.sottocategoria = '';
     document.getElementById('subLabel').textContent = 'Seleziona sottocategoria';
@@ -904,7 +914,7 @@ function pickItem(stateKey, value) {
 }
 
 // ================================================================
-//  SALVA
+//  SALVA — con logging debug visivo
 // ================================================================
 async function salva() {
   const amount = getAmountFloat();
@@ -944,15 +954,10 @@ async function salva() {
     fonte:              'iPhone'
   };
 
-  // ========== DEBUG LOGGING ==========
-  console.log('=== PWA DEBUG PAYLOAD ===');
-  console.log(JSON.stringify(payload, null, 2));
-  console.log('state.contoDestinazione:', state.contoDestinazione);
-  console.log('state.tipo:', state.tipo);
-  
-  // Mostra un toast con il payload per debug visivo (rimuovi dopo il test)
-  const debugInfo = `DEBUG - Tipo: ${payload.tipo} | ContoDest: "${payload.contoDestinazione}" | Importo: ${payload.importo}`;
-  showToast(debugInfo, 'success');
+  // ========== DEBUG VISIVO ==========
+  // Mostra un toast con le info chiave per verificare che contoDestinazione sia popolato
+  const debugMsg = `DEBUG | Tipo: ${payload.tipo} | Origine: ${payload.conto} | Dest: "${payload.contoDestinazione}" | €${amount}`;
+  showToast(debugMsg, 'success');
   // ===================================
 
   try {
@@ -967,7 +972,6 @@ async function salva() {
     showToast('&#10003; Transazione salvata', 'success');
     resetForm();
   } catch (err) {
-    console.error('FETCH ERROR:', err);
     AudioEngine.error(); Haptic.error();
     showToast('Errore di connessione', 'error');
   } finally {
@@ -975,6 +979,7 @@ async function salva() {
     btn.textContent = 'Salva transazione';
   }
 }
+
 function resetForm() {
   state.amount = '0';
   state.categoria = '';
@@ -1020,7 +1025,7 @@ function showToast(msg, type = '') {
   t.innerHTML = msg;
   t.className = 'toast show ' + type;
   clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 2800);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3500); // Aumentato a 3.5s per leggere il debug
 }
 
 init();
