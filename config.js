@@ -16,24 +16,24 @@
 const CATEGORIE = {
   Uscita: {
     Abbonamenti:    ['Palestra', 'Riviste', 'Software', 'Streaming', 'Altro'],
-    Casa:           ['Arredo', 'Manutenzione', 'Mutuo Affitto', 'Pulizie', 'Utenze', 'Altro'],
-    Cibo:           ['Delivery', 'Mensa', 'Pranzo lavoro', 'Ristoranti Bar', 'Spesa', 'Altro'],
-    Investimenti:   ['Azioni', 'Crypto', 'ETF PAC', 'Immobili', 'Liquidità', 'Pensione', 'Altro'],
-    Lavoro:         ['Attrezzatura', 'Formazione', 'Rappresentanza', 'Software', 'Trasferte', 'Altro'],
+    Casa:           ['Arredo', 'Manutenzione', 'Mutuo/Affitto', 'Pulizie', 'Utenze', 'Altro'],
+    Cibo:           ['Bar', 'Delivery', 'Ristorante', 'Spesa', 'Altro'],
+    Investimenti:   ['Azioni', 'Crypto', 'ETF PAC', 'Immobili', 'Altro'],
+    Lavoro:         ['Alberghi', 'Attrezzatura', 'Software', 'Altro'],
     Salute:         ['Dentista', 'Farmaci', 'Integratori', 'Medico Visite', 'Psicologia', 'Altro'],
     Svago:          ['Cultura', 'Hobby', 'Shopping', 'Sport', 'Viaggi', 'Altro'],
-    Tasse:          ['Bollo Auto', 'Bollo Conto', 'IMU', 'IRPEF', 'TARI', 'Altro'],
-    Trasporti:      ['Assicurazione Auto', 'Bollo Auto', 'Carburante', 'Manutenzione Auto', 'Mezzi Pubblici', 'Parcheggio', 'Taxi NCC', 'Altro'],
+    Tasse:          ['Bollo Conto Corrente', 'IMU', 'Multe', 'TARI', 'Tasse Investimenti (0,2%)', 'Tasse Plusvalenze'],
+    Trasporti:      ['Assicurazione Auto', 'Bollo Auto', 'Carburante', 'Manutenzione Auto', 'Mezzi Pubblici', 'Parcheggio', 'Taxi/NCC/Uber', 'Revisione Auto', 'Altro'],
     Altro:          ['Altro']
   },
   Entrata: {
-    'Affitto Percepito': ['Airbnb', 'Breve Termine', 'Lungo Termine', 'Altro'],
+    'Affitti': ['Airbnb', 'Breve Termine', 'Lungo Termine', 'Altro'],
     Bonus:               ['Bonus Annuale', 'MBO', 'Una Tantum', 'Altro'],
     Dividendi:           ['Azioni', 'ETF', 'Fondo', 'Altro'],
     Interessi:           ['BTP', 'Conto Deposito', 'Obbligazioni', 'Altro'],
     Regalo:              ['Regalo', 'Altro'],
-    'Rimborso Lavoro':   ['Diaria', 'Rimborso Km', 'Rimborso Spese', 'Rimborso Viaggio', 'Altro'],
-    Stipendio:           ['Arretrati', 'Ordinario mensile', 'Quattordicesima', 'ROL Pagati', 'TFR', 'Tredicesima', 'Altro'],
+    'Rimborso Lavoro':   ['Diaria', 'Rimborso Km', 'Rimborso Spese', 'Altro'],
+    Stipendio:           ['Bonus Annuale', 'Ordinario mensile', 'Quattordicesima', 'ROL Pagati', 'TFR', 'Tredicesima', 'Altro'],
     Vendite:             ['Auto', 'Immobili', 'Oggetti', 'Altro'],
     Altro:               ['Altro']
   }
