@@ -1,78 +1,64 @@
-// ================================================================
-//  GOOGLE APPS SCRIPT — Backend PWA Finanza Personale
-//
-//  SETUP:
-//  1. Apri il tuo Google Sheet Inbox
-//  2. Estensioni → Apps Script
-//  3. Incolla tutto questo codice
-//  4. Salva (Ctrl+S)
-//  5. Distribuisci → Nuova distribuzione → Tipo: App web
-//     - Esegui come: Me
-//     - Chi ha accesso: Chiunque
-//  6. Autorizza e copia l'URL generato
-//  7. Incolla l'URL nel file config.js della PWA (APPS_SCRIPT_URL)
-// ================================================================
-
-const SHEET_NAME = 'Form_Responses'; // nome del foglio nel tuo Google Sheet
+const SHEET_NAME = 'Dati';
 
 function doPost(e) {
   try {
-    const data = JSON.parse(e.postData.contents);
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME)
-                  || SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+    var contents = e.postData.contents;
+    var data = JSON.parse(contents);
 
-    // Se il foglio è vuoto, crea intestazioni
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        'Informazioni Cronologiche',
-        'Data della Spesa',
-        'Importo della Spesa',
-        'Destinazione',
-        'Macro Categoria',
-        'Conto',
-        'Note / Commenti',
-        'Tipologia Transazione'
-      ]);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(SHEET_NAME);
+
+    if (!sheet) {
+      throw new Error("Foglio '" + SHEET_NAME + "' non trovato");
     }
 
-    // Appende la riga con i dati ricevuti dalla PWA
-    sheet.appendRow([
-      new Date(),                  // A: Timestamp inserimento
-      new Date(data.data),         // B: Data della spesa
-      parseFloat(data.importo),    // C: Importo
-      data.destinazione || '',     // D: Destinazione
-      data.macroCategoria || '',   // E: Macro Categoria
-      data.conto || '',            // F: Conto
-      data.note || '',             // G: Note
-      data.tipo || 'Uscita'        // H: Tipo (Entrata/Uscita)
-    ]);
+    var lastRow = sheet.getLastRow();
+    var newRow = lastRow + 1;
 
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: 'ok' }))
-      .setMimeType(ContentService.MimeType.JSON);
+    if (lastRow === 0) {
+      var headers = ['Timestamp', 'Data_Spesa', 'Importo', 'Destinazione', 
+                     'Categoria', 'Sottocategoria', 'Conto', 'Note', 
+                     'Fonte', 'Tipo', 'Conto_Destinazione'];
+      for (var i = 0; i < headers.length; i++) {
+        sheet.getRange(1, i + 1).setValue(headers[i]);
+      }
+      newRow = 2;
+    }
+
+    // ========== TIMESTAMP con data e ora ==========
+    var now = new Date();
+    var timestamp = Utilities.formatDate(now, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm:ss');
+
+    // ========== DATA_SPESA in formato italiano gg/mm/aaaa ==========
+    var dataSpesaIT = '';
+    if (data.dataSpesa) {
+      var parts = data.dataSpesa.split('-'); // arriva come yyyy-mm-dd
+      if (parts.length === 3) {
+        dataSpesaIT = parts[2] + '/' + parts[1] + '/' + parts[0]; // gg/mm/aaaa
+      }
+    }
+
+    // Scrittura cella per cella
+    sheet.getRange(newRow, 1).setValue(timestamp);                           // A: Timestamp
+    sheet.getRange(newRow, 2).setValue(dataSpesaIT);                         // B: Data_Spesa (gg/mm/aaaa)
+    sheet.getRange(newRow, 3).setValue(data.importo || 0);                   // C: Importo
+    sheet.getRange(newRow, 4).setValue(data.destinazione || '');             // D: Destinazione
+    sheet.getRange(newRow, 5).setValue(data.categoria || '');                  // E: Categoria
+    sheet.getRange(newRow, 6).setValue(data.sottocategoria || '');             // F: Sottocategoria
+    sheet.getRange(newRow, 7).setValue(data.conto || '');                    // G: Conto
+    sheet.getRange(newRow, 8).setValue(data.note || '');                     // H: Note
+    sheet.getRange(newRow, 9).setValue(data.fonte || 'iPhone');              // I: Fonte
+    sheet.getRange(newRow, 10).setValue(data.tipo || '');                    // J: Tipo
+    sheet.getRange(newRow, 11).setValue(data.contoDestinazione || '');       // K: Conto_Destinazione
+
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "success"
+    })).setMimeType(ContentService.MimeType.JSON);
 
   } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "error", 
+      message: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
   }
-}
-
-// Test: esegui questa funzione manualmente per verificare che tutto funzioni
-function testPost() {
-  const fake = {
-    postData: {
-      contents: JSON.stringify({
-        data: new Date().toISOString(),
-        importo: 25.50,
-        destinazione: 'Personale',
-        macroCategoria: 'Cibo',
-        conto: 'Carta AMEX',
-        note: 'Test da Apps Script',
-        tipo: 'Uscita'
-      })
-    }
-  };
-  const result = doPost(fake);
-  Logger.log(result.getContent());
 }
