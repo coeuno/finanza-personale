@@ -1214,27 +1214,36 @@ async function salva() {
       body: JSON.stringify(payload),
     });
 
-    // POST inviato (fire-and-forget). Ora VERIFICHIAMO che sia davvero arrivato
-    // leggendo il foglio. Non tocchiamo la scrittura: solo conferma in lettura.
-    btn.innerHTML = '<span class="spinner"></span>Verifica...';
-    const confermato = await verificaSalvataggio(payload);
+    // Il POST è partito. Confermiamo SUBITO (com'era prima): veloce.
+    AudioEngine.success(); Haptic.success();
+    showToast('&#10003; Transazione salvata', 'success');
+    resetForm();
 
-    if (confermato) {
-      AudioEngine.success(); Haptic.success();
-      showToast('&#10003; Transazione salvata e confermata', 'success');
-      resetForm();
-    } else {
-      // Il POST non ha sollevato errori ma non troviamo la riga sul foglio.
-      AudioEngine.error(); Haptic.error();
-      showToast('&#9888; Salvataggio NON confermato. Controlla il foglio prima di reinserire.', 'error');
-      // NON resettiamo il form: così puoi ritentare senza riscrivere tutto.
-    }
+    // La verifica vera avviene IN BACKGROUND, senza bloccare l'utente.
+    // Avvisa SOLO se la transazione non risulta arrivata sul foglio.
+    verificaInBackground(payload);
+
   } catch (err) {
     AudioEngine.error(); Haptic.error();
     showToast('Errore di connessione', 'error');
   } finally {
     btn.disabled = false;
     btn.textContent = 'Salva transazione';
+  }
+}
+
+// Verifica in background: non blocca il salvataggio. Se dopo qualche
+// tentativo la riga non risulta sul foglio, mostra un avviso rosso.
+async function verificaInBackground(payload) {
+  try {
+    const confermato = await verificaSalvataggio(payload);
+    if (!confermato) {
+      Haptic.error();
+      showToast('&#9888; Attenzione: l\'ultima transazione potrebbe NON essere stata salvata. Controlla nel tab Ultime.', 'error');
+    }
+  } catch (e) {
+    // Se la verifica stessa fallisce (es. rete), non disturbiamo:
+    // il POST potrebbe essere andato a buon fine comunque.
   }
 }
 
@@ -1531,12 +1540,13 @@ async function loadUltime() {
 }
 
 // ================================================================
-//  DASHBOARD ANALISI — Opzione A: scarica tutto una volta,
-//  filtra e calcola in locale. Isolata, sola lettura.
+//  DASHBOARD ANALISI — riscritta: controlli FISSI, solo i
+//  risultati si aggiornano. Sola lettura, isolata.
 // ================================================================
-var dashData = null;       // tutte le righe scaricate (cache in memoria)
-var dashPeriodo = 'mese';  // 'mese' | 'anno' | 'tutto' | 'range'
-var dashCatMode = 'Uscita';// quale tipo mostrare nello spaccato categorie
+var dashData = null;        // tutte le righe scaricate (cache in memoria)
+var dashPeriodo = 'mese';   // 'mese' | 'anno' | 'tutto' | 'range'
+var dashCatMode = 'Uscita'; // 'Uscita' | 'Entrata' per lo spaccato categorie
+var dashControlsBuilt = false;
 
 function openDashboard() {
   AudioEngine.pop(); Haptic.pop();
@@ -1544,7 +1554,7 @@ function openDashboard() {
   if (dashData === null) {
     loadDashboard();
   } else {
-    renderDashboard();
+    aggiornaRisultati();
   }
 }
 
@@ -1553,13 +1563,15 @@ function closeDashboard() {
   document.getElementById('dashScreen').classList.remove('show');
 }
 
-// Converte "gg/mm/aaaa" in oggetto Date (o null se non valida)
+// "gg/mm/aaaa" -> Date, oppure null. Tollerante a spazi.
 function parseDataIT(s) {
   if (!s) return null;
-  var p = String(s).split('/');
+  var str = String(s).trim();
+  var p = str.split('/');
   if (p.length !== 3) return null;
   var g = parseInt(p[0], 10), m = parseInt(p[1], 10), a = parseInt(p[2], 10);
   if (isNaN(g) || isNaN(m) || isNaN(a)) return null;
+  if (a < 100) a += 2000; // eventuale anno a 2 cifre
   return new Date(a, m - 1, g);
 }
 
@@ -1578,7 +1590,8 @@ async function loadDashboard() {
   }
   try {
     dashData = await leggiTutto(url);
-    renderDashboard();
+    dashControlsBuilt = false;       // forziamo la ricostruzione dei controlli
+    costruisciDashboard();
   } catch (e) {
     body.innerHTML = '<div class="ultime-state">Impossibile caricare i dati.'
       + '<br><button class="ultime-retry" onclick="loadDashboard()">Riprova</button></div>';
@@ -1595,7 +1608,7 @@ async function leggiTutto(url) {
       var data = JSON.parse(txt);
       if (data.status === 'success') return data.righe || [];
     }
-  } catch (e) { /* JSONP */ }
+  } catch (e) { /* passa a JSONP */ }
   var d2 = await leggiTuttoJSONP(url);
   if (d2 && d2.status === 'success') return d2.righe || [];
   throw new Error('lettura fallita');
@@ -1619,46 +1632,51 @@ function leggiTuttoJSONP(url) {
   });
 }
 
-function setDashPeriodo(p) { dashPeriodo = p; Haptic.click(); renderDashboard(); }
-function setDashCatMode(m) { dashCatMode = m; Haptic.click(); renderDashboard(); }
-
-// Filtra le righe secondo il periodo selezionato
-function filtraPeriodo(righe) {
+// ---- COSTRUZIONE UI: i controlli si costruiscono UNA volta. ----
+// Cambiare periodo/mese/anno chiama solo aggiornaRisultati(), che NON
+// ricostruisce i controlli: aggiorna solo il riquadro #dashResult.
+function costruisciDashboard() {
+  var body = document.getElementById('dashBody');
+  var mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  var anni = anniDisponibili();
   var oggi = new Date();
-  if (dashPeriodo === 'tutto') return righe;
 
-  if (dashPeriodo === 'mese') {
-    var mSel = document.getElementById('dashMese');
-    var aSel = document.getElementById('dashAnnoMese');
-    var mese = mSel ? parseInt(mSel.value, 10) : oggi.getMonth();
-    var anno = aSel ? parseInt(aSel.value, 10) : oggi.getFullYear();
-    return righe.filter(function(r) {
-      var d = parseDataIT(r.dataSpesa);
-      return d && d.getMonth() === mese && d.getFullYear() === anno;
-    });
-  }
-  if (dashPeriodo === 'anno') {
-    var aSel2 = document.getElementById('dashAnno');
-    var anno2 = aSel2 ? parseInt(aSel2.value, 10) : oggi.getFullYear();
-    return righe.filter(function(r) {
-      var d = parseDataIT(r.dataSpesa);
-      return d && d.getFullYear() === anno2;
-    });
-  }
-  if (dashPeriodo === 'range') {
-    var da = document.getElementById('dashDa');
-    var a = document.getElementById('dashA');
-    var dDa = da && da.value ? new Date(da.value) : null;
-    var dA = a && a.value ? new Date(a.value) : null;
-    return righe.filter(function(r) {
-      var d = parseDataIT(r.dataSpesa);
-      if (!d) return false;
-      if (dDa && d < dDa) return false;
-      if (dA && d > dA) return false;
-      return true;
-    });
-  }
-  return righe;
+  var optM = mesi.map(function(nm, i) {
+    return '<option value="' + i + '"' + (i === oggi.getMonth() ? ' selected' : '') + '>' + nm + '</option>';
+  }).join('');
+  var optA = anni.map(function(y) {
+    return '<option value="' + y + '"' + (y === oggi.getFullYear() ? ' selected' : '') + '>' + y + '</option>';
+  }).join('');
+
+  var html = ''
+    // chip periodo
+    + '<div class="dash-period">'
+    +   '<button class="dash-chip" id="chipMese" onclick="setPeriodo(\'mese\')">Mese</button>'
+    +   '<button class="dash-chip" id="chipAnno" onclick="setPeriodo(\'anno\')">Anno</button>'
+    +   '<button class="dash-chip" id="chipTutto" onclick="setPeriodo(\'tutto\')">Tutto</button>'
+    +   '<button class="dash-chip" id="chipRange" onclick="setPeriodo(\'range\')">Intervallo</button>'
+    + '</div>'
+    // selettore mese (mese+anno)
+    + '<div class="dash-selectors" id="selMese">'
+    +   '<select id="dashMese" onchange="aggiornaRisultati()">' + optM + '</select>'
+    +   '<select id="dashAnnoMese" onchange="aggiornaRisultati()">' + optA + '</select>'
+    + '</div>'
+    // selettore anno
+    + '<div class="dash-selectors" id="selAnno" style="display:none;">'
+    +   '<select id="dashAnno" onchange="aggiornaRisultati()">' + optA + '</select>'
+    + '</div>'
+    // selettore range
+    + '<div class="dash-range" id="selRange">'
+    +   '<label>Da<input type="date" id="dashDa" onchange="aggiornaRisultati()"></label>'
+    +   '<label>A<input type="date" id="dashA" onchange="aggiornaRisultati()"></label>'
+    + '</div>'
+    // risultati (l'unica parte che cambia ai tap)
+    + '<div id="dashResult"></div>';
+
+  body.innerHTML = html;
+  dashControlsBuilt = true;
+  aggiornaVisibilitaControlli();
+  aggiornaRisultati();
 }
 
 function anniDisponibili() {
@@ -1672,63 +1690,96 @@ function anniDisponibili() {
   return arr;
 }
 
-function renderDashboard() {
-  var body = document.getElementById('dashBody');
-  if (!dashData) { body.innerHTML = '<div class="ultime-state">Nessun dato.</div>'; return; }
+function setPeriodo(p) {
+  dashPeriodo = p;
+  Haptic.click();
+  aggiornaVisibilitaControlli();
+  aggiornaRisultati();
+}
 
-  var mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
-  var anni = anniDisponibili();
+function setDashCatMode(m) {
+  dashCatMode = m;
+  Haptic.click();
+  aggiornaRisultati();
+}
+
+// Mostra/nasconde i selettori giusti e aggiorna lo stato attivo delle chip.
+function aggiornaVisibilitaControlli() {
+  if (!dashControlsBuilt) return;
+  ['Mese','Anno','Tutto','Range'].forEach(function(k) {
+    var el = document.getElementById('chip' + k);
+    if (el) el.classList.toggle('active', dashPeriodo === k.toLowerCase());
+  });
+  var selMese = document.getElementById('selMese');
+  var selAnno = document.getElementById('selAnno');
+  var selRange = document.getElementById('selRange');
+  if (selMese)  selMese.style.display  = (dashPeriodo === 'mese')  ? 'flex' : 'none';
+  if (selAnno)  selAnno.style.display  = (dashPeriodo === 'anno')  ? 'flex' : 'none';
+  if (selRange) selRange.style.display = (dashPeriodo === 'range') ? 'flex' : 'none';
+}
+
+// Applica il filtro periodo ai dati. Conta anche le righe con data non valida.
+function filtraPeriodo() {
+  var righe = dashData || [];
   var oggi = new Date();
+  var dateNonValide = 0;
 
-  var html = '<div class="dash-period">'
-    + chip('mese', 'Mese') + chip('anno', 'Anno') + chip('tutto', 'Tutto') + chip('range', 'Intervallo')
-    + '</div>';
-
-  if (dashPeriodo === 'mese') {
-    var optM = mesi.map(function(nm, i) {
-      var sel = (i === oggi.getMonth()) ? ' selected' : '';
-      return '<option value="' + i + '"' + sel + '>' + nm + '</option>';
-    }).join('');
-    var optA = anni.map(function(y) {
-      var sel = (y === oggi.getFullYear()) ? ' selected' : '';
-      return '<option value="' + y + '"' + sel + '>' + y + '</option>';
-    }).join('');
-    html += '<div class="dash-selectors">'
-      + '<select id="dashMese" onchange="renderDashResult()">' + optM + '</select>'
-      + '<select id="dashAnnoMese" onchange="renderDashResult()">' + optA + '</select>'
-      + '</div>';
-  } else if (dashPeriodo === 'anno') {
-    var optA2 = anni.map(function(y) {
-      var sel = (y === oggi.getFullYear()) ? ' selected' : '';
-      return '<option value="' + y + '"' + sel + '>' + y + '</option>';
-    }).join('');
-    html += '<div class="dash-selectors"><select id="dashAnno" onchange="renderDashResult()">' + optA2 + '</select></div>';
-  } else if (dashPeriodo === 'range') {
-    html += '<div class="dash-range show">'
-      + '<label>Da<input type="date" id="dashDa" onchange="renderDashResult()"></label>'
-      + '<label>A<input type="date" id="dashA" onchange="renderDashResult()"></label>'
-      + '</div>';
+  function valida(r) {
+    var d = parseDataIT(r.dataSpesa);
+    if (!d) { dateNonValide++; return null; }
+    return d;
   }
 
-  body.innerHTML = html + '<div id="dashResult"></div>';
-  renderDashResult();
+  var out;
+  if (dashPeriodo === 'tutto') {
+    out = righe.filter(function(r) { return valida(r) !== null; });
+  } else if (dashPeriodo === 'mese') {
+    var mSel = document.getElementById('dashMese');
+    var aSel = document.getElementById('dashAnnoMese');
+    var mese = mSel ? parseInt(mSel.value, 10) : oggi.getMonth();
+    var anno = aSel ? parseInt(aSel.value, 10) : oggi.getFullYear();
+    out = righe.filter(function(r) {
+      var d = valida(r);
+      return d && d.getMonth() === mese && d.getFullYear() === anno;
+    });
+  } else if (dashPeriodo === 'anno') {
+    var aSel2 = document.getElementById('dashAnno');
+    var anno2 = aSel2 ? parseInt(aSel2.value, 10) : oggi.getFullYear();
+    out = righe.filter(function(r) {
+      var d = valida(r);
+      return d && d.getFullYear() === anno2;
+    });
+  } else if (dashPeriodo === 'range') {
+    var da = document.getElementById('dashDa');
+    var a = document.getElementById('dashA');
+    var dDa = (da && da.value) ? new Date(da.value + 'T00:00:00') : null;
+    var dA = (a && a.value) ? new Date(a.value + 'T23:59:59') : null;
+    out = righe.filter(function(r) {
+      var d = valida(r);
+      if (!d) return false;
+      if (dDa && d < dDa) return false;
+      if (dA && d > dA) return false;
+      return true;
+    });
+  } else {
+    out = righe;
+  }
+  return { righe: out, dateNonValide: dateNonValide };
 }
 
-function chip(p, label) {
-  return '<button class="dash-chip' + (dashPeriodo === p ? ' active' : '') + '" onclick="setDashPeriodo(\'' + p + '\')">' + label + '</button>';
-}
-
-function renderDashResult() {
+// Aggiorna SOLO il riquadro risultati. Non tocca i controlli.
+function aggiornaRisultati() {
   var res = document.getElementById('dashResult');
   if (!res) return;
 
-  var righe = filtraPeriodo(dashData);
+  var filtro = filtraPeriodo();
+  var righe = filtro.righe;
 
   var entrate = 0, uscite = 0, trasf = 0;
   righe.forEach(function(r) {
     var imp = Number(r.importo) || 0;
     if (r.tipo === 'Entrata') entrate += imp;
-    else if (r.tipo === 'Uscita') uscite += imp;       // già negativo
+    else if (r.tipo === 'Uscita') uscite += imp;        // già negativo
     else if (r.tipo === 'Trasferimento') trasf += imp;
   });
   var saldo = entrate + uscite;
@@ -1742,6 +1793,7 @@ function renderDashResult() {
   }
   h += '</div>';
 
+  // Spaccato per categoria
   h += '<div class="dash-section-title">Per categoria</div>';
   h += '<div class="dash-cat-toggle">'
     + '<button class="' + (dashCatMode === 'Uscita' ? 'active' : '') + '" onclick="setDashCatMode(\'Uscita\')">Uscite</button>'
@@ -1761,7 +1813,7 @@ function renderDashResult() {
     h += '<div class="ultime-state" style="padding:20px;">Nessun movimento nel periodo.</div>';
   } else {
     var max = catArr[0].val;
-    var colore = dashCatMode === 'Uscita' ? 'var(--accent-uscita)' : 'var(--accent-entrata)';
+    var colore = (dashCatMode === 'Uscita') ? 'var(--accent-uscita)' : 'var(--accent-entrata)';
     catArr.forEach(function(c) {
       var pct = max > 0 ? Math.round((c.val / max) * 100) : 0;
       h += '<div class="dash-bar-row">'
@@ -1771,7 +1823,14 @@ function renderDashResult() {
     });
   }
 
-  h += '<div class="dash-count">' + righe.length + ' transazioni nel periodo</div>';
+  // Riga conteggio + eventuale avviso date non valide (diagnostica utile)
+  h += '<div class="dash-count">' + righe.length + ' transazioni nel periodo';
+  h += ' &middot; ' + (dashData ? dashData.length : 0) + ' totali caricate';
+  if (filtro.dateNonValide > 0) {
+    h += '<br><span style="color:var(--accent-uscita);">' + filtro.dateNonValide + ' righe con data non leggibile (escluse)</span>';
+  }
+  h += '</div>';
+
   res.innerHTML = h;
 }
 
