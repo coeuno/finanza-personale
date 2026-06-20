@@ -1132,6 +1132,88 @@ function formatImporto(n) {
   return segno + '€ ' + s;
 }
 
+// Disegna le righe nella lista (riusato da fetch e da JSONP)
+function renderUltime(righe) {
+  var listEl = document.getElementById('ultimeList');
+  if (!righe || righe.length === 0) {
+    listEl.innerHTML = '<div class="ultime-state">Nessuna registrazione trovata.</div>';
+    return;
+  }
+  var html = '';
+  righe.forEach(function(r) {
+    var num = Number(r.importo);
+    var cls = 'pos';
+    if (r.tipo === 'Trasferimento') cls = 'trasf';
+    else if (num < 0) cls = 'neg';
+
+    var titolo, meta;
+    if (r.tipo === 'Trasferimento') {
+      titolo = 'Trasferimento';
+      meta = (r.conto || '?') + ' → ' + (r.contoDestinazione || '?');
+    } else {
+      titolo = r.categoria || '—';
+      var metaParts = [];
+      if (r.sottocategoria) metaParts.push(r.sottocategoria);
+      if (r.conto) metaParts.push(r.conto);
+      meta = metaParts.join(' · ');
+    }
+    if (r.note) meta = meta ? (meta + ' · ' + r.note) : r.note;
+
+    html += '<div class="ultime-row">'
+      + '<div class="ultime-row-main">'
+      + '<div class="ultime-row-top">'
+      + '<span class="ultime-cat">' + escapeHtml(titolo) + '</span>'
+      + '<span class="ultime-importo ' + cls + '">' + escapeHtml(formatImporto(num)) + '</span>'
+      + '</div>'
+      + '<div class="ultime-meta">' + escapeHtml(meta || '—') + '</div>'
+      + '<div class="ultime-data">' + escapeHtml(r.dataSpesa || '') + '</div>'
+      + '</div>'
+      + '</div>';
+  });
+  listEl.innerHTML = html;
+  Haptic.pop();
+}
+
+function renderUltimeError() {
+  document.getElementById('ultimeList').innerHTML =
+    '<div class="ultime-state">Impossibile caricare le registrazioni.<br>'
+    + 'Controlla la connessione.'
+    + '<br><button class="ultime-retry" onclick="loadUltime()">Riprova</button>'
+    + '</div>';
+}
+
+// Fallback JSONP: carica via tag <script>, immune al redirect 302 su iOS.
+function loadUltimeJSONP(url) {
+  return new Promise(function(resolve, reject) {
+    var cbName = 'ultimeCb_' + Date.now();
+    var script = document.createElement('script');
+    var timer = setTimeout(function() {
+      cleanup();
+      reject(new Error('timeout'));
+    }, 12000);
+
+    function cleanup() {
+      clearTimeout(timer);
+      try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cbName] = function(data) {
+      cleanup();
+      resolve(data);
+    };
+
+    script.onerror = function() {
+      cleanup();
+      reject(new Error('script error'));
+    };
+
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    script.src = url + sep + 'action=ultime&n=7&callback=' + cbName;
+    document.body.appendChild(script);
+  });
+}
+
 async function loadUltime() {
   var listEl = document.getElementById('ultimeList');
   listEl.innerHTML = '<div class="ultime-state"><span class="spinner"></span>Caricamento…</div>';
@@ -1142,63 +1224,31 @@ async function loadUltime() {
     return;
   }
 
-  var sep = url.indexOf('?') >= 0 ? '&' : '?';
-  var fetchUrl = url + sep + 'action=ultime&n=7';
-
+  // TENTATIVO 1: fetch (segue il redirect, legge come testo)
   try {
-    var resp = await fetch(fetchUrl, { method: 'GET' });
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    var data = await resp.json();
-
-    if (data.status !== 'success') {
-      throw new Error(data.message || 'Risposta non valida');
-    }
-
-    var righe = data.righe || [];
-    if (righe.length === 0) {
-      listEl.innerHTML = '<div class="ultime-state">Nessuna registrazione trovata.</div>';
-      return;
-    }
-
-    var html = '';
-    righe.forEach(function(r) {
-      var num = Number(r.importo);
-      var cls = 'pos';
-      if (r.tipo === 'Trasferimento') cls = 'trasf';
-      else if (num < 0) cls = 'neg';
-
-      var titolo, meta;
-      if (r.tipo === 'Trasferimento') {
-        titolo = 'Trasferimento';
-        meta = (r.conto || '?') + ' → ' + (r.contoDestinazione || '?');
-      } else {
-        titolo = r.categoria || '—';
-        var metaParts = [];
-        if (r.sottocategoria) metaParts.push(r.sottocategoria);
-        if (r.conto) metaParts.push(r.conto);
-        meta = metaParts.join(' · ');
-      }
-      if (r.note) meta = meta ? (meta + ' · ' + r.note) : r.note;
-
-      html += '<div class="ultime-row">'
-        + '<div class="ultime-row-main">'
-        + '<div class="ultime-row-top">'
-        + '<span class="ultime-cat">' + escapeHtml(titolo) + '</span>'
-        + '<span class="ultime-importo ' + cls + '">' + escapeHtml(formatImporto(num)) + '</span>'
-        + '</div>'
-        + '<div class="ultime-meta">' + escapeHtml(meta || '—') + '</div>'
-        + '<div class="ultime-data">' + escapeHtml(r.dataSpesa || '') + '</div>'
-        + '</div>'
-        + '</div>';
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    var resp = await fetch(url + sep + 'action=ultime&n=7', {
+      method: 'GET',
+      redirect: 'follow',
+      cache: 'no-store'
     });
-    listEl.innerHTML = html;
-    Haptic.pop();
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var testo = await resp.text();
+    var data = JSON.parse(testo);
+    if (data.status !== 'success') throw new Error(data.message || 'Risposta non valida');
+    renderUltime(data.righe || []);
+    return;
+  } catch (errFetch) {
+    // Il fetch è fallito (tipico su iOS per il redirect). Provo JSONP.
+  }
 
-  } catch (err) {
-    listEl.innerHTML = '<div class="ultime-state">Impossibile caricare le registrazioni.<br>'
-      + 'Controlla la connessione.'
-      + '<br><button class="ultime-retry" onclick="loadUltime()">Riprova</button>'
-      + '</div>';
+  // TENTATIVO 2: JSONP (immune al redirect)
+  try {
+    var data2 = await loadUltimeJSONP(url);
+    if (!data2 || data2.status !== 'success') throw new Error('JSONP non valido');
+    renderUltime(data2.righe || []);
+  } catch (errJsonp) {
+    renderUltimeError();
   }
 }
 

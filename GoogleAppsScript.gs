@@ -1,9 +1,28 @@
 const SHEET_NAME = 'Dati';
 
 // ================================================================
+//  Helper risposta: JSON puro, oppure JSONP se arriva ?callback=...
+//  JSONP serve come fallback robusto su iOS (non soffre il redirect 302).
+// ================================================================
+function _rispondi(e, obj) {
+  var json = JSON.stringify(obj);
+  var cb = (e && e.parameter && e.parameter.callback) ? e.parameter.callback : null;
+  if (cb) {
+    // Sanifico il nome callback: solo lettere, numeri, _ e .
+    cb = String(cb).replace(/[^a-zA-Z0-9_.]/g, '');
+    return ContentService
+      .createTextOutput(cb + '(' + json + ');')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService
+    .createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ================================================================
 //  doGet — SOLA LETTURA. Restituisce le ultime N righe in JSON.
 //  Non scrive NULLA. Non tocca doPost. Usato dal Tab "Ultime".
-//  Chiamata: GET <url>?action=ultime&n=7
+//  Chiamata: GET <url>?action=ultime&n=7   (+ &callback=fn per JSONP)
 // ================================================================
 function doGet(e) {
   try {
@@ -19,20 +38,14 @@ function doGet(e) {
     var sheet = ss.getSheetByName(SHEET_NAME);
 
     if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({
-        status: "error",
-        message: "Foglio '" + SHEET_NAME + "' non trovato"
-      })).setMimeType(ContentService.MimeType.JSON);
+      return _rispondi(e, { status: "error", message: "Foglio '" + SHEET_NAME + "' non trovato" });
     }
 
     var lastRow = sheet.getLastRow();
 
     // Nessuna riga dati (solo header o foglio vuoto)
     if (lastRow <= 1) {
-      return ContentService.createTextOutput(JSON.stringify({
-        status: "success",
-        righe: []
-      })).setMimeType(ContentService.MimeType.JSON);
+      return _rispondi(e, { status: "success", righe: [] });
     }
 
     var numDati = lastRow - 1;              // righe dati (escluso header in riga 1)
@@ -40,39 +53,36 @@ function doGet(e) {
     var startRow = lastRow - quante + 1;    // prima riga del blocco da leggere
 
     // 11 colonne: A..K (vedi header in doPost)
-    var values = sheet.getRange(startRow, 1, quante, 11).getValues();
+    var range = sheet.getRange(startRow, 1, quante, 11);
+    var values = range.getValues();          // valori grezzi (per importo numerico)
+    var display = range.getDisplayValues();  // valori come mostrati nel foglio (date in gg/mm/aaaa)
 
     var righe = [];
     for (var i = 0; i < values.length; i++) {
       var r = values[i];
+      var d = display[i];
       righe.push({
-        timestamp:         String(r[0]),
-        dataSpesa:         String(r[1]),
-        importo:           r[2],
-        destinazione:      String(r[3]),
-        categoria:         String(r[4]),
-        sottocategoria:    String(r[5]),
-        conto:             String(r[6]),
-        note:              String(r[7]),
-        fonte:             String(r[8]),
-        tipo:              String(r[9]),
-        contoDestinazione: String(r[10])
+        timestamp:         d[0],             // "08/05/2026 12:30:14" come nel foglio
+        dataSpesa:         d[1],             // "04/05/2026" come nel foglio
+        importo:           r[2],             // numero grezzo, per colore/segno
+        destinazione:      d[3],
+        categoria:         d[4],
+        sottocategoria:    d[5],
+        conto:             d[6],
+        note:              d[7],
+        fonte:             d[8],
+        tipo:              d[9],
+        contoDestinazione: d[10]
       });
     }
 
     // Ordine: la più recente per prima
     righe.reverse();
 
-    return ContentService.createTextOutput(JSON.stringify({
-      status: "success",
-      righe: righe
-    })).setMimeType(ContentService.MimeType.JSON);
+    return _rispondi(e, { status: "success", righe: righe });
 
   } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({
-      status: "error",
-      message: err.toString()
-    })).setMimeType(ContentService.MimeType.JSON);
+    return _rispondi(e, { status: "error", message: err.toString() });
   }
 }
 
