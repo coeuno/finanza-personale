@@ -48,6 +48,28 @@ function doGet(e) {
       return _rispondi(e, { status: "success", righe: [] });
     }
 
+    // ===== AZIONE "tutto": tutte le righe per la dashboard di analisi =====
+    // Restituisce solo i campi utili all'analisi (payload più leggero).
+    if (e && e.parameter && e.parameter.action === 'tutto') {
+      var numDatiT = lastRow - 1;
+      var rangeT = sheet.getRange(2, 1, numDatiT, 11);
+      var valT = rangeT.getValues();          // grezzi (importo numerico)
+      var dispT = rangeT.getDisplayValues();  // date formattate gg/mm/aaaa
+      var righeT = [];
+      for (var t = 0; t < valT.length; t++) {
+        righeT.push({
+          dataSpesa:      dispT[t][1],   // B come nel foglio (gg/mm/aaaa)
+          importo:        valT[t][2],    // C numerico
+          destinazione:   dispT[t][3],   // D
+          categoria:      dispT[t][4],   // E
+          sottocategoria: dispT[t][5],   // F
+          conto:          dispT[t][6],   // G
+          tipo:           dispT[t][9]    // J
+        });
+      }
+      return _rispondi(e, { status: "success", righe: righeT });
+    }
+
     var numDati = lastRow - 1;              // righe dati (escluso header in riga 1)
     var quante = Math.min(n, numDati);
     var startRow = lastRow - quante + 1;    // prima riga del blocco da leggere

@@ -429,6 +429,161 @@
       cursor: pointer;
       font-family: inherit;
     }
+
+    /* ── DASHBOARD ANALISI ──────────────────────────────────────── */
+    .dash-screen {
+      position: fixed; inset: 0;
+      background: var(--bg-primary);
+      z-index: 260;
+      display: none;
+      flex-direction: column;
+      max-width: 430px;
+      margin: 0 auto;
+    }
+    .dash-screen.show { display: flex; }
+    .dash-header {
+      padding: 12px 20px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .dash-title { font-size: 17px; font-weight: 600; }
+    .dash-body {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 4px 16px 24px;
+    }
+    /* Filtri periodo */
+    .dash-period {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .dash-chip {
+      flex: 1;
+      min-width: 60px;
+      background: var(--bg-field);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      padding: 9px 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: center;
+    }
+    .dash-chip.active {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+    .dash-selectors {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .dash-selectors select, .dash-selectors input {
+      flex: 1;
+      background: var(--bg-field);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .dash-range {
+      display: none;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .dash-range.show { display: flex; }
+    .dash-range label {
+      flex: 1;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    /* Card totali */
+    .dash-totals {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .dash-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .dash-card-label { font-size: 14px; color: var(--text-secondary); }
+    .dash-card-value { font-size: 19px; font-weight: 700; }
+    .dash-card-value.pos { color: var(--accent-entrata); }
+    .dash-card-value.neg { color: var(--accent-uscita); }
+    .dash-card-value.trasf { color: var(--accent-trasf); }
+    .dash-card.saldo { border: 1px solid var(--border); }
+    .dash-card.saldo .dash-card-value { font-size: 22px; }
+    /* Spaccato categorie */
+    .dash-section-title {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 6px 4px 10px;
+    }
+    .dash-cat-toggle {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .dash-cat-toggle button {
+      flex: 1;
+      background: var(--bg-field);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      padding: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .dash-cat-toggle button.active {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+    .dash-bar-row { margin-bottom: 10px; }
+    .dash-bar-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .dash-bar-cat { color: var(--text-primary); font-weight: 600; }
+    .dash-bar-val { color: var(--text-secondary); }
+    .dash-bar-track {
+      height: 7px;
+      background: var(--bg-field);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .dash-bar-fill { height: 100%; border-radius: 4px; }
+    .dash-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 14px;
+    }
   </style>
 </head>
 <body>
@@ -469,6 +624,20 @@
   <div class="safe-bottom"></div>
 </div>
 
+<!-- DASHBOARD ANALISI SCREEN -->
+<div class="dash-screen" id="dashScreen">
+  <div class="safe-top"></div>
+  <div class="dash-header">
+    <button class="header-btn" onclick="closeDashboard()" title="Indietro">&#8249;</button>
+    <div class="dash-title">Analisi</div>
+    <button class="header-btn" onclick="loadDashboard()" title="Aggiorna">&#8635;</button>
+  </div>
+  <div class="dash-body" id="dashBody">
+    <div class="ultime-state">Caricamento…</div>
+  </div>
+  <div class="safe-bottom"></div>
+</div>
+
 <!-- MAIN APP -->
 <div class="app" id="mainApp" style="display:none">
   <div class="safe-top"></div>
@@ -476,7 +645,10 @@
   <div class="header">
     <div class="header-date" id="headerDate"></div>
     <div class="header-title">Nuova transazione</div>
-    <button class="header-btn" onclick="openConfig()" title="Impostazioni">&#9881;</button>
+    <div style="display:flex;gap:6px;">
+      <button class="header-btn" onclick="openDashboard()" title="Analisi">&#128202;</button>
+      <button class="header-btn" onclick="openConfig()" title="Impostazioni">&#9881;</button>
+    </div>
   </div>
 
   <div class="tipo-wrap">
@@ -1042,9 +1214,21 @@ async function salva() {
       body: JSON.stringify(payload),
     });
 
-    AudioEngine.success(); Haptic.success();
-    showToast('&#10003; Transazione salvata', 'success');
-    resetForm();
+    // POST inviato (fire-and-forget). Ora VERIFICHIAMO che sia davvero arrivato
+    // leggendo il foglio. Non tocchiamo la scrittura: solo conferma in lettura.
+    btn.innerHTML = '<span class="spinner"></span>Verifica...';
+    const confermato = await verificaSalvataggio(payload);
+
+    if (confermato) {
+      AudioEngine.success(); Haptic.success();
+      showToast('&#10003; Transazione salvata e confermata', 'success');
+      resetForm();
+    } else {
+      // Il POST non ha sollevato errori ma non troviamo la riga sul foglio.
+      AudioEngine.error(); Haptic.error();
+      showToast('&#9888; Salvataggio NON confermato. Controlla il foglio prima di reinserire.', 'error');
+      // NON resettiamo il form: così puoi ritentare senza riscrivere tutto.
+    }
   } catch (err) {
     AudioEngine.error(); Haptic.error();
     showToast('Errore di connessione', 'error');
@@ -1052,6 +1236,84 @@ async function salva() {
     btn.disabled = false;
     btn.textContent = 'Salva transazione';
   }
+}
+
+// Verifica che la transazione appena inviata sia comparsa sul foglio.
+// Riusa la lettura doGet. Fa qualche tentativo perché Apps Script può
+// avere un ritardo (cold start) prima di scrivere la riga.
+async function verificaSalvataggio(payload) {
+  const url = localStorage.getItem('appsScriptUrl');
+  if (!url) return false;
+
+  // Impronta della transazione: nota + importo (arrotondato a 2 decimali).
+  const notaAttesa = (payload.note || '').trim();
+  const importoAtteso = Math.round(Number(payload.importo) * 100) / 100;
+
+  // Fino a 3 tentativi, con attese crescenti (il primo dopo 1.5s).
+  const attese = [1500, 2500, 3500];
+
+  for (let i = 0; i < attese.length; i++) {
+    await new Promise(r => setTimeout(r, attese[i]));
+
+    let righe = null;
+    try {
+      righe = await leggiUltime(url, 10);
+    } catch (e) {
+      righe = null; // riprova al giro dopo
+    }
+
+    if (righe && righe.length) {
+      const trovata = righe.some(function(r) {
+        const imp = Math.round(Number(r.importo) * 100) / 100;
+        const nota = (r.note || '').trim();
+        // Match su importo; se c'è una nota, deve coincidere (rende il match preciso).
+        if (imp !== importoAtteso) return false;
+        if (notaAttesa) return nota === notaAttesa;
+        return true; // senza nota, basta l'importo nelle ultimissime righe
+      });
+      if (trovata) return true;
+    }
+  }
+  return false;
+}
+
+// Lettura grezza delle ultime N righe (ritorna l'array righe o lancia errore).
+// Usa fetch con fallback JSONP, come il Tab Ultime.
+async function leggiUltime(url, n) {
+  const sep = url.indexOf('?') >= 0 ? '&' : '?';
+  // tentativo fetch
+  try {
+    const resp = await fetch(url + sep + 'action=ultime&n=' + n, {
+      method: 'GET', redirect: 'follow', cache: 'no-store'
+    });
+    if (resp.ok) {
+      const txt = await resp.text();
+      const data = JSON.parse(txt);
+      if (data.status === 'success') return data.righe || [];
+    }
+  } catch (e) { /* passa a JSONP */ }
+  // fallback JSONP
+  const data2 = await leggiUltimeJSONP(url, n);
+  if (data2 && data2.status === 'success') return data2.righe || [];
+  throw new Error('lettura fallita');
+}
+
+function leggiUltimeJSONP(url, n) {
+  return new Promise(function(resolve, reject) {
+    const cbName = 'verCb_' + Date.now();
+    const script = document.createElement('script');
+    const timer = setTimeout(function() { cleanup(); reject(new Error('timeout')); }, 10000);
+    function cleanup() {
+      clearTimeout(timer);
+      try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+    window[cbName] = function(d) { cleanup(); resolve(d); };
+    script.onerror = function() { cleanup(); reject(new Error('script error')); };
+    const sep = url.indexOf('?') >= 0 ? '&' : '?';
+    script.src = url + sep + 'action=ultime&n=' + n + '&callback=' + cbName;
+    document.body.appendChild(script);
+  });
 }
 
 function resetForm() {
@@ -1266,6 +1528,251 @@ async function loadUltime() {
     + '<div style="margin:16px 0;padding:12px;background:var(--bg-card);border-radius:8px;">' + diagHtml + '</div>'
     + '<button class="ultime-retry" onclick="loadUltime()">Riprova</button>'
     + '</div>';
+}
+
+// ================================================================
+//  DASHBOARD ANALISI — Opzione A: scarica tutto una volta,
+//  filtra e calcola in locale. Isolata, sola lettura.
+// ================================================================
+var dashData = null;       // tutte le righe scaricate (cache in memoria)
+var dashPeriodo = 'mese';  // 'mese' | 'anno' | 'tutto' | 'range'
+var dashCatMode = 'Uscita';// quale tipo mostrare nello spaccato categorie
+
+function openDashboard() {
+  AudioEngine.pop(); Haptic.pop();
+  document.getElementById('dashScreen').classList.add('show');
+  if (dashData === null) {
+    loadDashboard();
+  } else {
+    renderDashboard();
+  }
+}
+
+function closeDashboard() {
+  AudioEngine.click(); Haptic.click();
+  document.getElementById('dashScreen').classList.remove('show');
+}
+
+// Converte "gg/mm/aaaa" in oggetto Date (o null se non valida)
+function parseDataIT(s) {
+  if (!s) return null;
+  var p = String(s).split('/');
+  if (p.length !== 3) return null;
+  var g = parseInt(p[0], 10), m = parseInt(p[1], 10), a = parseInt(p[2], 10);
+  if (isNaN(g) || isNaN(m) || isNaN(a)) return null;
+  return new Date(a, m - 1, g);
+}
+
+function fmtEuro(n) {
+  var num = Number(n) || 0;
+  return num.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+}
+
+async function loadDashboard() {
+  var body = document.getElementById('dashBody');
+  body.innerHTML = '<div class="ultime-state"><span class="spinner"></span>Caricamento dati…</div>';
+  var url = localStorage.getItem('appsScriptUrl');
+  if (!url) {
+    body.innerHTML = '<div class="ultime-state">URL non configurato.</div>';
+    return;
+  }
+  try {
+    dashData = await leggiTutto(url);
+    renderDashboard();
+  } catch (e) {
+    body.innerHTML = '<div class="ultime-state">Impossibile caricare i dati.'
+      + '<br><button class="ultime-retry" onclick="loadDashboard()">Riprova</button></div>';
+  }
+}
+
+// Scarica tutte le righe (fetch + fallback JSONP)
+async function leggiTutto(url) {
+  var sep = url.indexOf('?') >= 0 ? '&' : '?';
+  try {
+    var resp = await fetch(url + sep + 'action=tutto', { method: 'GET', redirect: 'follow', cache: 'no-store' });
+    if (resp.ok) {
+      var txt = await resp.text();
+      var data = JSON.parse(txt);
+      if (data.status === 'success') return data.righe || [];
+    }
+  } catch (e) { /* JSONP */ }
+  var d2 = await leggiTuttoJSONP(url);
+  if (d2 && d2.status === 'success') return d2.righe || [];
+  throw new Error('lettura fallita');
+}
+
+function leggiTuttoJSONP(url) {
+  return new Promise(function(resolve, reject) {
+    var cbName = 'tuttoCb_' + Date.now();
+    var script = document.createElement('script');
+    var timer = setTimeout(function() { cleanup(); reject(new Error('timeout')); }, 20000);
+    function cleanup() {
+      clearTimeout(timer);
+      try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+    window[cbName] = function(d) { cleanup(); resolve(d); };
+    script.onerror = function() { cleanup(); reject(new Error('script error')); };
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    script.src = url + sep + 'action=tutto&callback=' + cbName;
+    document.body.appendChild(script);
+  });
+}
+
+function setDashPeriodo(p) { dashPeriodo = p; Haptic.click(); renderDashboard(); }
+function setDashCatMode(m) { dashCatMode = m; Haptic.click(); renderDashboard(); }
+
+// Filtra le righe secondo il periodo selezionato
+function filtraPeriodo(righe) {
+  var oggi = new Date();
+  if (dashPeriodo === 'tutto') return righe;
+
+  if (dashPeriodo === 'mese') {
+    var mSel = document.getElementById('dashMese');
+    var aSel = document.getElementById('dashAnnoMese');
+    var mese = mSel ? parseInt(mSel.value, 10) : oggi.getMonth();
+    var anno = aSel ? parseInt(aSel.value, 10) : oggi.getFullYear();
+    return righe.filter(function(r) {
+      var d = parseDataIT(r.dataSpesa);
+      return d && d.getMonth() === mese && d.getFullYear() === anno;
+    });
+  }
+  if (dashPeriodo === 'anno') {
+    var aSel2 = document.getElementById('dashAnno');
+    var anno2 = aSel2 ? parseInt(aSel2.value, 10) : oggi.getFullYear();
+    return righe.filter(function(r) {
+      var d = parseDataIT(r.dataSpesa);
+      return d && d.getFullYear() === anno2;
+    });
+  }
+  if (dashPeriodo === 'range') {
+    var da = document.getElementById('dashDa');
+    var a = document.getElementById('dashA');
+    var dDa = da && da.value ? new Date(da.value) : null;
+    var dA = a && a.value ? new Date(a.value) : null;
+    return righe.filter(function(r) {
+      var d = parseDataIT(r.dataSpesa);
+      if (!d) return false;
+      if (dDa && d < dDa) return false;
+      if (dA && d > dA) return false;
+      return true;
+    });
+  }
+  return righe;
+}
+
+function anniDisponibili() {
+  var set = {};
+  (dashData || []).forEach(function(r) {
+    var d = parseDataIT(r.dataSpesa);
+    if (d) set[d.getFullYear()] = true;
+  });
+  var arr = Object.keys(set).map(Number).sort(function(a, b) { return b - a; });
+  if (arr.length === 0) arr = [new Date().getFullYear()];
+  return arr;
+}
+
+function renderDashboard() {
+  var body = document.getElementById('dashBody');
+  if (!dashData) { body.innerHTML = '<div class="ultime-state">Nessun dato.</div>'; return; }
+
+  var mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  var anni = anniDisponibili();
+  var oggi = new Date();
+
+  var html = '<div class="dash-period">'
+    + chip('mese', 'Mese') + chip('anno', 'Anno') + chip('tutto', 'Tutto') + chip('range', 'Intervallo')
+    + '</div>';
+
+  if (dashPeriodo === 'mese') {
+    var optM = mesi.map(function(nm, i) {
+      var sel = (i === oggi.getMonth()) ? ' selected' : '';
+      return '<option value="' + i + '"' + sel + '>' + nm + '</option>';
+    }).join('');
+    var optA = anni.map(function(y) {
+      var sel = (y === oggi.getFullYear()) ? ' selected' : '';
+      return '<option value="' + y + '"' + sel + '>' + y + '</option>';
+    }).join('');
+    html += '<div class="dash-selectors">'
+      + '<select id="dashMese" onchange="renderDashResult()">' + optM + '</select>'
+      + '<select id="dashAnnoMese" onchange="renderDashResult()">' + optA + '</select>'
+      + '</div>';
+  } else if (dashPeriodo === 'anno') {
+    var optA2 = anni.map(function(y) {
+      var sel = (y === oggi.getFullYear()) ? ' selected' : '';
+      return '<option value="' + y + '"' + sel + '>' + y + '</option>';
+    }).join('');
+    html += '<div class="dash-selectors"><select id="dashAnno" onchange="renderDashResult()">' + optA2 + '</select></div>';
+  } else if (dashPeriodo === 'range') {
+    html += '<div class="dash-range show">'
+      + '<label>Da<input type="date" id="dashDa" onchange="renderDashResult()"></label>'
+      + '<label>A<input type="date" id="dashA" onchange="renderDashResult()"></label>'
+      + '</div>';
+  }
+
+  body.innerHTML = html + '<div id="dashResult"></div>';
+  renderDashResult();
+}
+
+function chip(p, label) {
+  return '<button class="dash-chip' + (dashPeriodo === p ? ' active' : '') + '" onclick="setDashPeriodo(\'' + p + '\')">' + label + '</button>';
+}
+
+function renderDashResult() {
+  var res = document.getElementById('dashResult');
+  if (!res) return;
+
+  var righe = filtraPeriodo(dashData);
+
+  var entrate = 0, uscite = 0, trasf = 0;
+  righe.forEach(function(r) {
+    var imp = Number(r.importo) || 0;
+    if (r.tipo === 'Entrata') entrate += imp;
+    else if (r.tipo === 'Uscita') uscite += imp;       // già negativo
+    else if (r.tipo === 'Trasferimento') trasf += imp;
+  });
+  var saldo = entrate + uscite;
+
+  var h = '<div class="dash-totals">'
+    + '<div class="dash-card"><span class="dash-card-label">Entrate</span><span class="dash-card-value pos">' + fmtEuro(entrate) + '</span></div>'
+    + '<div class="dash-card"><span class="dash-card-label">Uscite</span><span class="dash-card-value neg">' + fmtEuro(Math.abs(uscite)) + '</span></div>'
+    + '<div class="dash-card saldo"><span class="dash-card-label">Saldo netto</span><span class="dash-card-value ' + (saldo >= 0 ? 'pos' : 'neg') + '">' + fmtEuro(saldo) + '</span></div>';
+  if (trasf !== 0) {
+    h += '<div class="dash-card"><span class="dash-card-label">Trasferimenti</span><span class="dash-card-value trasf">' + fmtEuro(Math.abs(trasf)) + '</span></div>';
+  }
+  h += '</div>';
+
+  h += '<div class="dash-section-title">Per categoria</div>';
+  h += '<div class="dash-cat-toggle">'
+    + '<button class="' + (dashCatMode === 'Uscita' ? 'active' : '') + '" onclick="setDashCatMode(\'Uscita\')">Uscite</button>'
+    + '<button class="' + (dashCatMode === 'Entrata' ? 'active' : '') + '" onclick="setDashCatMode(\'Entrata\')">Entrate</button>'
+    + '</div>';
+
+  var perCat = {};
+  righe.forEach(function(r) {
+    if (r.tipo !== dashCatMode) return;
+    var cat = r.categoria || '—';
+    perCat[cat] = (perCat[cat] || 0) + Math.abs(Number(r.importo) || 0);
+  });
+  var catArr = Object.keys(perCat).map(function(k) { return { cat: k, val: perCat[k] }; })
+    .sort(function(a, b) { return b.val - a.val; });
+
+  if (catArr.length === 0) {
+    h += '<div class="ultime-state" style="padding:20px;">Nessun movimento nel periodo.</div>';
+  } else {
+    var max = catArr[0].val;
+    var colore = dashCatMode === 'Uscita' ? 'var(--accent-uscita)' : 'var(--accent-entrata)';
+    catArr.forEach(function(c) {
+      var pct = max > 0 ? Math.round((c.val / max) * 100) : 0;
+      h += '<div class="dash-bar-row">'
+        + '<div class="dash-bar-head"><span class="dash-bar-cat">' + escapeHtml(c.cat) + '</span><span class="dash-bar-val">' + fmtEuro(c.val) + '</span></div>'
+        + '<div class="dash-bar-track"><div class="dash-bar-fill" style="width:' + pct + '%;background:' + colore + ';"></div></div>'
+        + '</div>';
+    });
+  }
+
+  h += '<div class="dash-count">' + righe.length + ' transazioni nel periodo</div>';
+  res.innerHTML = h;
 }
 
 init();
