@@ -1224,6 +1224,8 @@ async function loadUltime() {
     return;
   }
 
+  var diag = [];  // raccoglie cosa succede, per mostrarlo se tutto fallisce
+
   // TENTATIVO 1: fetch (segue il redirect, legge come testo)
   try {
     var sep = url.indexOf('?') >= 0 ? '&' : '?';
@@ -1232,24 +1234,38 @@ async function loadUltime() {
       redirect: 'follow',
       cache: 'no-store'
     });
+    diag.push('fetch: HTTP ' + resp.status + ' (ok=' + resp.ok + ')');
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     var testo = await resp.text();
+    diag.push('fetch: ricevuti ' + testo.length + ' caratteri');
+    diag.push('fetch: inizio risposta = ' + testo.substring(0, 60));
     var data = JSON.parse(testo);
-    if (data.status !== 'success') throw new Error(data.message || 'Risposta non valida');
+    if (data.status !== 'success') throw new Error(data.message || 'status=' + data.status);
     renderUltime(data.righe || []);
     return;
   } catch (errFetch) {
-    // Il fetch è fallito (tipico su iOS per il redirect). Provo JSONP.
+    diag.push('fetch FALLITO: ' + (errFetch && errFetch.message ? errFetch.message : errFetch));
   }
 
   // TENTATIVO 2: JSONP (immune al redirect)
   try {
     var data2 = await loadUltimeJSONP(url);
-    if (!data2 || data2.status !== 'success') throw new Error('JSONP non valido');
+    diag.push('jsonp: risposta ricevuta, status=' + (data2 && data2.status));
+    if (!data2 || data2.status !== 'success') throw new Error('status=' + (data2 && data2.status));
     renderUltime(data2.righe || []);
+    return;
   } catch (errJsonp) {
-    renderUltimeError();
+    diag.push('jsonp FALLITO: ' + (errJsonp && errJsonp.message ? errJsonp.message : errJsonp));
   }
+
+  // Entrambi falliti: mostro la diagnostica completa a schermo
+  var diagHtml = diag.map(function(d) {
+    return '<div style="font-size:11px;color:var(--text-muted);text-align:left;margin:4px 0;word-break:break-all;">• ' + escapeHtml(d) + '</div>';
+  }).join('');
+  listEl.innerHTML = '<div class="ultime-state">Impossibile caricare le registrazioni.'
+    + '<div style="margin:16px 0;padding:12px;background:var(--bg-card);border-radius:8px;">' + diagHtml + '</div>'
+    + '<button class="ultime-retry" onclick="loadUltime()">Riprova</button>'
+    + '</div>';
 }
 
 init();
