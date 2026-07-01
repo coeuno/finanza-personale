@@ -908,6 +908,10 @@ function onDateChange() {
   if (val) {
     state.dataSpesa = val;
     document.getElementById('dataLabel').textContent = formatDateIT(val);
+    if (val > todayISO()) {
+      showToast('&#9888; Data nel futuro: sicuro?', 'error');
+      AudioEngine.error(); Haptic.error();
+    }
   }
 }
 
