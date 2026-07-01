@@ -29,12 +29,11 @@ const CATEGORIE = {
   },
   Entrata: {
     'Affitto Percepito': ['Airbnb', 'Breve Termine', 'Lungo Termine', 'Altro'],
-    Bonus:               ['Bonus Annuale', 'MBO', 'Una Tantum', 'Altro'],
+    Banca:               ['Rimborso', 'Interessi Attivi', 'Storno', 'Altro'],
     Dividendi:           ['Azioni', 'ETF', 'Fondo', 'Altro'],
     Interessi:           ['BTP', 'Conto Deposito', 'Obbligazioni', 'Altro'],
-    Regalo:              ['Regalo', 'Altro'],
-    'Rimborso Lavoro':   ['Diaria', 'Rimborso Km', 'Rimborso Spese', 'Rimborso Viaggio', 'Altro'],
-    Stipendio:           ['Arretrati', 'Ordinario Mensile', 'Quattordicesima', 'ROL Pagati', 'TFR', 'Tredicesima', 'Altro'],
+    Lavoro:              ['Ordinario Mensile', 'Tredicesima', 'Quattordicesima', 'TFR', 'ROL Pagati', 'Rimborso Spese', 'Bonus Annuale', 'Premio Performance', 'Una Tantum', 'Altro'],
+    'Regalo Ricevuto':   ['Altro'],
     Vendite:             ['Auto', 'Immobili', 'Oggetti', 'Altro'],
     Altro:               ['Altro']
   }
