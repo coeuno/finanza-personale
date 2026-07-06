@@ -1,4 +1,4 @@
-const CACHE = 'finanza-v7';
+const CACHE = 'finanza-v9';
 const ASSETS = ['./index.html', './manifest.json', './config.js'];
 
 self.addEventListener('install', e => {
